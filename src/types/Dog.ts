@@ -15,13 +15,9 @@ export interface Dog {
     age: number;             // Computed from birthday (do not store; calculate on demand).
     weightKg: number;        // Dog's weight in kilograms (1–110).
     languageCode: string;    // The language the dog "speaks" (optional for now).
-    
+
     // Multi-select properties (stored as arrays but represented as bitmaps in URLs)
     physicalQuirks: DogQuirk[];
     behaviorQuirks: DogQuirk[];
-    obedienceCommands: DogCommand[];
-    playCommands: DogCommand[];
-    behaviorCommands: DogCommand[];
-    advancedCommands: DogCommand[];
-    socialCommands: DogCommand[];
+    knownCommands: DogCommand[];
   }
