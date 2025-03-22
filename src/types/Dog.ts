@@ -8,6 +8,7 @@ export interface Dog {
     // Core properties
     name: string;
     breedInfo: BreedInfo; // All breed-related info is derived from this object.
+    gender: 'male' | 'male_neutered' | 'female' | 'female_spayed';
 
     // Info properties
     birthday: Date;          // The dog's birthday (with a -20 year limit).
