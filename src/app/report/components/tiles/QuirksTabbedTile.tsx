@@ -41,12 +41,12 @@ const QuirksTabbedTile: React.FC<QuirksTabbedTileProps> = ({ physicalQuirks, beh
   };
 
   return (
-    <div>
+    <div style={{height: "100%"}}>
       <TabStrip
         selected={selected}
         onSelect={handleSelect}
         tabPosition="left"  // Positions tabs on the left-hand side
-        size="small"        // Uses small tabs
+        size="large"        // Uses small tabs
         style={{ height: '500px', userSelect: 'none' }}
       >
         {tabs.map((tab, index) => (

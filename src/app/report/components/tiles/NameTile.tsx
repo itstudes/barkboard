@@ -10,7 +10,7 @@ interface NameTileProps {
 
 const NameTile: React.FC<NameTileProps> = ({ name }) => {
   return (
-    <div>
+    <div style={{height: "100%"}}>
       <h1 className="tile-h1-text">{toProperCase(name)}</h1>
     </div>
   );
