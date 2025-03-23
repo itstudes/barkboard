@@ -1,5 +1,6 @@
-export interface DogQuirk {
-  base2Id: number;         // Must be a power of 2 (e.g., 1, 2, 4, 8, etc.) for bit mapping.
+import { Base2Entity } from './Base2Entity';
+
+export interface DogQuirk extends Base2Entity {
   name: string;
   description: string;
   type: 'appearance' | 'medical' | 'general behavior' | 'animal interaction' | 'human interaction' | 'play' ;
