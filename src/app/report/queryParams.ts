@@ -1,29 +1,35 @@
 import { Dog } from "@/types/Dog";
 import { BreedInfo } from "@/types/BreedInfo";
 import { getQueryParam } from "@/utils/queryUtils";
+import { breeds } from "@/constants/data/DogBreeds";
+import { physicalQuirks, behavioralQuirks } from '../../constants/data/DogQuirks';
+import { commands } from '../../constants/data/DogCommands';
+import { getBitmap, filterEntitiesByBitmap } from '../../utils/base2Utils';
 
 // Constants for validation.
 const MAX_WEIGHT_KG = 110; // Maximum weight for a dog in kilograms.
 const MIN_WEIGHT_KG = 1; // Minimum weight for a dog in kilograms.
-const MAX_AGE_YEARS = 20; // Maximum age for a dog in years.
-const STEP_CORE_PARAMS = 1; // Step for core parameters.
-const STEP_HEALTH_METRICS = 2; // Step for health metrics.
+const MAX_AGE_YEARS = 20; // Maximum age for a living dog in years.
+const VALID_GENDERS = ["male", "male_neutered", "female", "female_spayed"];
+
+//UI stepper steps
+const STEP_CORE_PARAMS = 1;         // Step for core parameters.
+const STEP_HEALTH_METRICS = 2;      // Step for health metrics.
+const STEP_PHYSICAL_QUIRKS = 3;     // Step for physical quirks.
+const STEP_BEHAVIORAL_QUIRKS = 4;   // Step for behavioral quirks.
+const STEP_COMMANDS = 5;            // Step for commands.
 
 // Define an interface for the query parameters.
 export interface ReportQueryParams {
   name?: string;
-  breedId?: string;
+  breedId?: string
   gender?: string;
   ticks?: string;
   weightKg?: string;
   lang?: string;
   physicalQuirksBitmap?: string;
   behavioralQuirksBitmap?: string;
-  obedienceCommandsBitmap?: string;
-  playCommandsBitmap?: string;
-  behaviorCommandsBitmap?: string;
-  advancedCommandsBitmap?: string;
-  socialCommandsBitmap?: string;
+  knownCommandsBitmap?: string;
 }
 
 // Define an interface for reporting invalid query parameters.
@@ -39,10 +45,7 @@ export interface InvalidQueryItem {
  * @param breeds An array of valid BreedInfo objects.
  * @returns An object with isValid flag and an array of InvalidQueryItem errors.
  */
-export function isValidDog(
-  params: ReportQueryParams,
-  breeds: BreedInfo[]
-): { isValid: boolean; errors: InvalidQueryItem[] } {
+export function isValidDog(params: ReportQueryParams): { isValid: boolean; errors: InvalidQueryItem[] } {
   const errors: InvalidQueryItem[] = [];
 
   // Define required parameters and their associated fix step.
@@ -85,7 +88,7 @@ export function isValidDog(
     });
   }
 
-  // Validate the weight range (1–110 kg).
+  // Validate the weight range
   if (weight && !isNaN(Number(weight))) {
     const weightNum = Number(weight);
     if (weightNum < MIN_WEIGHT_KG || weightNum > MAX_WEIGHT_KG) {
@@ -126,29 +129,103 @@ export function isValidDog(
 
   // Validate gender.
   const gender = getQueryParam(params.gender);
-  const validGenders = ["male", "male_neutered", "female", "female_spayed"];
-  if (gender && !validGenders.includes(gender)) {
+  if (gender && !VALID_GENDERS.includes(gender)) {
     errors.push({
       propertyName: "gender",
-      errorMessage: `Invalid gender. Allowed values are: ${validGenders.join(
+      errorMessage: `Invalid gender. Allowed values are: ${VALID_GENDERS.join(
         ", "
       )}`,
       fixAtStep: STEP_CORE_PARAMS,
     });
   }
 
-  // Ensure the provided breedId exists within the breeds collection.
-  const breedIdStr = getQueryParam(params.breedId);
-  if (breedIdStr && !isNaN(Number(breedIdStr))) {
-    const breedId = Number(breedIdStr);
-    if (!breeds.some((breed) => breed.id === breedId)) {
-      errors.push({
-        propertyName: "breedId",
-        errorMessage: "Invalid breedId. No matching breed found.",
-        fixAtStep: STEP_CORE_PARAMS,
-      });
+    // Validate breedId.
+    const breedIdStr = getQueryParam(params.breedId);
+    if (breedIdStr) {
+      if (isNaN(Number(breedIdStr))) {
+        errors.push({
+          propertyName: "breedId",
+          errorMessage: "breedId must be a valid number",
+          fixAtStep: STEP_CORE_PARAMS,
+        });
+      } else {
+        const breedId = Number(breedIdStr);
+        if (!breeds.some((breed) => breed.id === breedId)) {
+          errors.push({
+            propertyName: "breedId",
+            errorMessage: "Invalid breedId. No matching breed found.",
+            fixAtStep: STEP_CORE_PARAMS,
+          });
+        }
+      }
     }
-  }
+  
+    // Validate physicalQuirksBitmap.
+    const physicalQuirksBitmapStr = getQueryParam(params.physicalQuirksBitmap);
+    if (physicalQuirksBitmapStr) {
+      if (isNaN(Number(physicalQuirksBitmapStr))) {
+        errors.push({
+          propertyName: "physicalQuirksBitmap",
+          errorMessage: "physicalQuirksBitmap must be a valid number",
+          fixAtStep: STEP_PHYSICAL_QUIRKS,
+        });
+      } else {
+        const bitmap = Number(physicalQuirksBitmapStr);
+        // Calculate allowed bits from the physical quirks constant collection.
+        const allowedBitmap = getBitmap(physicalQuirks);
+        if ((bitmap & ~allowedBitmap) !== 0) {
+          errors.push({
+            propertyName: "physicalQuirksBitmap",
+            errorMessage: "physicalQuirksBitmap contains invalid bits",
+            fixAtStep: STEP_PHYSICAL_QUIRKS,
+          });
+        }
+      }
+    }
+  
+    // Validate behavioralQuirksBitmap.
+    const behavioralQuirksBitmapStr = getQueryParam(params.behavioralQuirksBitmap);
+    if (behavioralQuirksBitmapStr) {
+      if (isNaN(Number(behavioralQuirksBitmapStr))) {
+        errors.push({
+          propertyName: "behavioralQuirksBitmap",
+          errorMessage: "behavioralQuirksBitmap must be a valid number",
+          fixAtStep: STEP_BEHAVIORAL_QUIRKS,
+        });
+      } else {
+        const bitmap = Number(behavioralQuirksBitmapStr);
+        const allowedBitmap = getBitmap(behavioralQuirks);
+        if ((bitmap & ~allowedBitmap) !== 0) {
+          errors.push({
+            propertyName: "behavioralQuirksBitmap",
+            errorMessage: "behavioralQuirksBitmap contains invalid bits",
+            fixAtStep: STEP_BEHAVIORAL_QUIRKS,
+          });
+        }
+      }
+    }
+  
+    // Validate knownCommandsBitmap.
+    const knownCommandsBitmapStr = getQueryParam(params.knownCommandsBitmap);
+    if (knownCommandsBitmapStr) {
+      if (isNaN(Number(knownCommandsBitmapStr))) {
+        errors.push({
+          propertyName: "knownCommandsBitmap",
+          errorMessage: "knownCommandsBitmap must be a valid number",
+          fixAtStep: STEP_COMMANDS,
+        });
+      } else {
+        const bitmap = Number(knownCommandsBitmapStr);
+        const allowedBitmap = getBitmap(commands);
+        if ((bitmap & ~allowedBitmap) !== 0) {
+          errors.push({
+            propertyName: "knownCommandsBitmap",
+            errorMessage: "knownCommandsBitmap contains invalid bits",
+            fixAtStep: STEP_COMMANDS,
+          });
+        }
+      }
+    }
 
   return { isValid: errors.length === 0, errors };
 }
@@ -159,7 +236,7 @@ export function isValidDog(
  * @param breeds An array of valid BreedInfo objects.
  * @returns A Dog object.
  */
-export function mapToDog(params: ReportQueryParams, breeds: BreedInfo[]): Dog {
+export function mapToDog(params: ReportQueryParams): Dog {
   const breedId = Number(getQueryParam(params.breedId));
   const breed = breeds.find((b) => b.id === breedId)!;
 
@@ -168,6 +245,11 @@ export function mapToDog(params: ReportQueryParams, breeds: BreedInfo[]): Dog {
   const birthDate = new Date(ticks);
   const currentDate = new Date();
   const ageInYears = currentDate.getFullYear() - birthDate.getFullYear();
+
+   // Extract bitmaps. If a bitmap is not provided, default to 0.
+   const physicalQuirksBitmap = Number(getQueryParam(params.physicalQuirksBitmap)) || 0;
+   const behavioralQuirksBitmap = Number(getQueryParam(params.behavioralQuirksBitmap)) || 0;
+   const knownCommandsBitmap = Number(getQueryParam(params.knownCommandsBitmap)) || 0; 
 
   return {
     name: getQueryParam(params.name)!,
@@ -178,9 +260,9 @@ export function mapToDog(params: ReportQueryParams, breeds: BreedInfo[]): Dog {
     age: ageInYears,
     weightKg: Number(getQueryParam(params.weightKg)),
     languageCode: getQueryParam(params.lang) || "en",
-    physicalQuirks: [],
-    behaviorQuirks: [],
-    knownCommands: [],
+    physicalQuirks: filterEntitiesByBitmap(physicalQuirks, physicalQuirksBitmap),
+    behaviorQuirks: filterEntitiesByBitmap(behavioralQuirks, behavioralQuirksBitmap),
+    knownCommands: filterEntitiesByBitmap(commands, knownCommandsBitmap),
   };
 }
 
