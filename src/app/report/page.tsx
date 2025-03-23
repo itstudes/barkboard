@@ -4,12 +4,12 @@ import { getQueryParam } from "@/utils/queryUtils";
 import DogReport from "./components/DogReport";
 
 interface ReportPageProps {
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 export default async function ReportPage({ searchParams }: ReportPageProps) {
 
-  const awaitedSearchParams = searchParams;
+  const awaitedSearchParams = await searchParams;
 
   // Convert the raw searchParams using the getQueryParam utility.
   const params: ReportQueryParams = {
