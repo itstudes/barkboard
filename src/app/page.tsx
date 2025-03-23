@@ -641,10 +641,10 @@ export default function Home() {
                       >
                         <Image
                           //src = {card.headerImage}
-                          src="/dog-breed-svgrepo-com.svg"
+                          src={"/dog-breed" + state.step + "-svgrepo-com.svg"}
                           alt="dog-breed-svgrepo-com.svg"
-                          width={160}
-                          height={160}
+                          width={150}
+                          height={150}
                           priority
                         />
                         <h1
