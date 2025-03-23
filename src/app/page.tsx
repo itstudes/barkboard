@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useReducer } from "react";
+import React, { useReducer } from "react";
 import Image from "next/image";
 import { SvgIcon } from "@progress/kendo-react-common";
 import { Button } from "@progress/kendo-react-buttons";
@@ -9,10 +9,10 @@ import {
   DatePicker,
   DatePickerChangeEvent,
 } from "@progress/kendo-react-dateinputs";
+import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
 
 import {
   CardFooter,
-  CardImage,
   Stepper,
   StepperChangeEvent,
 } from "@progress/kendo-react-layout";
@@ -21,8 +21,6 @@ import {
   CardHeader,
   CardTitle,
   CardBody,
-  CardActions,
-  CardSubtitle,
   // Avatar,
 } from "@progress/kendo-react-layout";
 import { ChipList, ChipListChangeEvent } from "@progress/kendo-react-buttons";
@@ -31,7 +29,11 @@ import styles from "./page.module.css";
 
 import { useRouter } from "next/navigation";
 
-import { chevronRightIcon, chevronLeftIcon } from "@progress/kendo-svg-icons";
+import {
+  chevronRightIcon,
+  chevronLeftIcon,
+  columnsIcon,
+} from "@progress/kendo-svg-icons";
 import {
   RadioGroup,
   RadioGroupChangeEvent,
@@ -45,12 +47,12 @@ import { DogCommand } from "@/types/DogCommand";
 import { commands } from "@/constants/data/DogCommands";
 import { physicalQuirks, behavioralQuirks } from "@/constants/data/DogQuirks";
 import { breeds } from "@/constants/data/DogBreeds";
+import { tryBuildReportUrl } from "./report/queryParams";
 
 import {
   DropDownList,
   DropDownListChangeEvent,
 } from "@progress/kendo-react-dropdowns";
-import { groupBy } from "@progress/kendo-data-query";
 
 const defaultDogQuirk: DogQuirk[] = [];
 
@@ -60,7 +62,7 @@ const defaultDog: Dog = {
   name: "",
   breedInfo: {} as BreedInfo, // Adjust default values for BreedInfo as needed
   gender: "male", // Choose a default valid gender
-  birthday: new Date(),
+  birthday: new Date("2023-01-01"),
   birthdayTicks: 0,
   age: 0,
   weightKg: 0,
@@ -85,7 +87,8 @@ type Action =
   | { type: "INCREMENT_STEP" }
   | { type: "DECREMENT_STEP" }
   | { type: "SET_KNOWN_COMMANDS"; payload: DogCommand[] }
-  | { type: "SET_BEHAVIOUR_QUIRKS"; payload: DogQuirk[] };
+  | { type: "SET_BEHAVIOUR_QUIRKS"; payload: DogQuirk[] }
+  | { type: "SET_PHYSICAL_QUIRKS"; payload: DogQuirk[] };
 
 function formReducer(state: State, action: Action): State {
   switch (action.type) {
@@ -126,6 +129,15 @@ function formReducer(state: State, action: Action): State {
         },
       };
     }
+    case "SET_PHYSICAL_QUIRKS": {
+      return {
+        ...state,
+        dog: {
+          ...state.dog,
+          physicalQuirks: action.payload,
+        },
+      };
+    }
     default:
       return state;
   }
@@ -138,6 +150,12 @@ const chipCommands = commands.map((command) => ({
 }));
 
 const chipBehavioralQuirks = behavioralQuirks.map((quirk) => ({
+  text: quirk.name,
+  value: quirk.name,
+  quirk: quirk,
+}));
+
+const chipPhysicalQuirks = physicalQuirks.map((quirk) => ({
   text: quirk.name,
   value: quirk.name,
   quirk: quirk,
@@ -156,45 +174,54 @@ const ungroupedBreedInfo = breeds.map((el) =>
 const cardsData = [
   {
     thumbnailSrc: "/dog-wirehair-svgrepo-com.svg",
-    headerTitle: "Welcome to Barkboard",
-    headerSubtitle: "And we'll give you a free summary report of your pup!",
+    headerTitle: "Welcome to Barkboard 🫶",
+    headerSubtitle:
+      "And we&apos;ll give you a free summary report of your pup!",
     label: "Welcome",
     url: "https://demos.telerik.com/kendo-react-ui/assets/layout/card/rila.jpg",
   },
   {
     thumbnailSrc: "/dog-wirehair-svgrepo-com.svg",
-    headerTitle: "Tell us about your doggo",
-    headerSubtitle: "And we'll give you a free summary report of your pup!",
-    label: "Summary",
+    headerTitle: "Tell us about your doggo 😄",
+    headerSubtitle:
+      "And we&apos;ll give you a free summary report of your pup!",
+    label: "Info",
     url: "https://demos.telerik.com/kendo-react-ui/assets/layout/card/rila.jpg",
   },
   {
     thumbnailSrc: "/dog-wirehair-svgrepo-com.svg",
-    headerTitle: "What Behavioural quirks do they have? 🫠",
+    headerTitle: "What physical quirks do they have? 💪",
     headerSubtitle: "Bulgaria, Europe",
-    label: "Quirks",
+    label: "Identity",
+    url: "https://demos.telerik.com/kendo-react-ui/assets/layout/card/pamporovo.jpg",
+  },
+  {
+    thumbnailSrc: "/dog-wirehair-svgrepo-com.svg",
+    headerTitle: "What behavioural quirks do they have? 🫠",
+    headerSubtitle: "Bulgaria, Europe",
+    label: "Behavioral",
     url: "https://demos.telerik.com/kendo-react-ui/assets/layout/card/pamporovo.jpg",
   },
   {
     thumbnailSrc: "/dog-wirehair-svgrepo-com.svg",
     headerTitle: "What Words and Commands does your pooch know? 🤓",
     headerSubtitle: "Bulgaria, Europe",
-    label: "Dictionary",
+    label: "Words",
     url: "https://demos.telerik.com/kendo-react-ui/assets/layout/card/camping.jpg",
   },
   {
     thumbnailSrc: "/dog-wirehair-svgrepo-com.svg",
-    headerTitle: "Here's your QR code! 🐶",
-    label: "Your Report!",
+    headerTitle: "Here&apos;s your report! 🐶",
+    label: "Report",
     url: "https://demos.telerik.com/kendo-react-ui/assets/layout/card/camping.jpg",
   },
 ];
 
 const genderOptions: Array<{ label: string; value: Dog["gender"] }> = [
   { label: "Male", value: "male" },
-  // { label: "Neutered Male", value: "male_neutered" },
+  { label: "Male ✂️", value: "male_neutered" },
   { label: "Female", value: "female" },
-  // { label: "Spayed Female", value: "female_spayed" },
+  { label: "Female ✂️", value: "female_spayed" },
 ];
 
 export default function Home() {
@@ -205,6 +232,7 @@ export default function Home() {
     dog: defaultDog,
     step: 0,
   });
+  const [reportError, setReportError] = React.useState<string | null>(null);
 
   // useEffect(() => {
   //   setCard(cardsData[step]);
@@ -281,6 +309,16 @@ export default function Home() {
       if (selectedQuirks) {
         dispatch({ type: "SET_BEHAVIOUR_QUIRKS", payload: selectedQuirks });
       }
+    } else if (name === "physicalQuirks") {
+      const selectedQuirks = chipPhysicalQuirks
+        .filter((chip) => selectedNames.includes(chip.value))
+        .map((chip) => chip.quirk);
+      console.log(selectedNames);
+      console.log(selectedQuirks);
+
+      if (selectedQuirks) {
+        dispatch({ type: "SET_PHYSICAL_QUIRKS", payload: selectedQuirks });
+      }
     }
   };
 
@@ -294,6 +332,20 @@ export default function Home() {
       });
     };
 
+  const onClickGoToReport = () => {
+    const report_url = tryBuildReportUrl(state.dog);
+    console.log(report_url);
+    const { success, url, errors } = tryBuildReportUrl(state.dog);
+    if (success && url) {
+      window.open(url, "_blank");
+    } else {
+      setReportError(
+        "Failed to generate report URL:\n" +
+          errors.map((e) => "• " + e.errorMessage).join("\n")
+      );
+    }
+  };
+
   const handleReset = () => {
     dispatch({ type: "RESET" });
   };
@@ -303,7 +355,21 @@ export default function Home() {
       case 0:
         return (
           <div className={styles.cardBody}>
-            <div>Welcome!!!</div>
+            <div className="k-pt-3 k-pl-5">
+              <h1>Hi there fellow dog owner</h1>
+              <p className="k-pt-3">
+                This application generates a unique summary report detailing
+                your dog. It can be used to show off to your friends, to take
+                with to the vet, puppy training, or to show your pet sitter.
+                Simply follow the steps to enter your dog&apos;s information.
+              </p>
+              <p>
+                Once your dog&apos;s profile is complete, a permanent report URL
+                is created that you can share with your family and friends—it
+                will always be the same for your dog.
+              </p>
+              <p>Click &quot;Info&quot; or &quot;Next&quot; to get started!</p>
+            </div>
           </div>
         );
       case 1:
@@ -400,11 +466,36 @@ export default function Home() {
           <div className={styles.cardBody}>
             <div className="k-pt-3 k-pl-5">
               <Label className="k-label k-font-bold">
-                Select the applicable quirks
+                Select the applicable physical quirks
               </Label>
               <div
                 style={{
                   maxHeight: "25vh",
+                  overflowY: "scroll",
+                  marginTop: "10px",
+                  marginBottom: "10px",
+                }}
+              >
+                <ChipList
+                  data={chipPhysicalQuirks}
+                  selection="multiple"
+                  onChange={handleChipChange("physicalQuirks")}
+                  value={state.dog.physicalQuirks.map((quirk) => quirk.name)}
+                />
+              </div>
+            </div>
+          </div>
+        );
+      case 3:
+        return (
+          <div className={styles.cardBody}>
+            <div className="k-pt-3 k-pl-5">
+              <Label className="k-label k-font-bold">
+                Select the applicable behavioral quirks
+              </Label>
+              <div
+                style={{
+                  maxHeight: "30vh",
                   overflowY: "scroll",
                   marginTop: "10px",
                   marginBottom: "10px",
@@ -420,13 +511,13 @@ export default function Home() {
             </div>
           </div>
         );
-      case 3:
+      case 4:
         return (
           <div className={styles.cardBody}>
             <div className="k-pt-3 k-pl-5">
               <div>
                 <Label className="k-label k-font-bold">
-                  Please select all your dog's known Commands
+                  Please select all your dog&apos known Commands
                 </Label>
                 <ChipList
                   className="k-pt-5"
@@ -441,10 +532,49 @@ export default function Home() {
             </div>
           </div>
         );
-      case 4:
+      case 5:
         return (
           <div className={styles.cardBody}>
-            <div>Report!!!</div>
+            <div
+              className="k-pt-3 k-pl-5"
+              style={{
+                height: "100%",
+                display: "flex",
+                flexDirection: "column",
+                justifyItems: "left",
+                // alignItems: "center",
+              }}
+            >
+              <h1>Get your report</h1>
+              <p className="k-pt-3">
+                Go to your report and share the url with anytone you want to see
+                it.
+              </p>
+              <div
+                className="k-d-flex k-flex-row k-pt-5"
+                style={{
+                  justifyContent: "center",
+                  alignItems: "center",
+                  // width: "100%",
+                }}
+              >
+                <Button
+                  themeColor="primary"
+                  fillMode="outline"
+                  onClick={onClickGoToReport}
+                >
+                  Go to report
+                </Button>
+                <span style={{ width: "10px" }} />
+                <Button
+                  themeColor="secondary"
+                  fillMode="outline"
+                  onClick={handleReset}
+                >
+                  Reset Profile
+                </Button>
+              </div>
+            </div>
           </div>
         );
       default:
@@ -583,6 +713,14 @@ export default function Home() {
         </div>
       </section>
 
+      {reportError && (
+        <Dialog title="⚠️ Error" onClose={() => setReportError(null)}>
+          <div style={{ whiteSpace: "pre-wrap" }}>{reportError}</div>
+          <DialogActionsBar>
+            <Button onClick={() => setReportError(null)}>Close</Button>
+          </DialogActionsBar>
+        </Dialog>
+      )}
       <footer className={styles.footer}>
         <p>Copyright © 2023 Progress Software. All rights reserved.</p>
       </footer>
