@@ -161,15 +161,26 @@ const chipPhysicalQuirks = physicalQuirks.map((quirk) => ({
   quirk: quirk,
 }));
 
-const ungroupedBreedInfo = breeds.map((el) =>
-  el.size
-    ? {
-        ...el,
-        size_text:
-          el.size.charAt(0).toUpperCase() + el.size.substring(1).toLowerCase(),
-      }
-    : { ...el, size_text: "unknown" }
-);
+const ungroupedBreedInfo = breeds
+  .map((el) =>
+    el.size
+      ? {
+          ...el,
+          size_text:
+            el.size.charAt(0).toUpperCase() +
+            el.size.substring(1).toLowerCase(),
+        }
+      : { ...el, size_text: "unknown" }
+  )
+  .sort((a, b) => {
+    // First sort by size group
+    if (a.size_text < b.size_text) return -1;
+    if (a.size_text > b.size_text) return 1;
+    // Then sort alphabetically by breed name
+    if (a.name < b.name) return -1;
+    if (a.name > b.name) return 1;
+    return 0;
+  });
 
 const cardsData = [
   {
