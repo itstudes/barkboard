@@ -174,42 +174,42 @@ const ungroupedBreedInfo = breeds.map((el) =>
 const cardsData = [
   {
     thumbnailSrc: "/dog-wirehair-svgrepo-com.svg",
-    headerTitle: "Welcome to Barkboard 🫶",
+    headerTitle: "Welcome to Barkboard!",
     headerSubtitle: "And we will give you a free summary report of your pup!",
     label: "Welcome",
     url: "https://demos.telerik.com/kendo-react-ui/assets/layout/card/rila.jpg",
   },
   {
     thumbnailSrc: "/dog-wirehair-svgrepo-com.svg",
-    headerTitle: "Tell us about your doggo 😄",
+    headerTitle: "Tell us about your doggo",
     headerSubtitle: "And we'll give you a free summary report of your pup!",
     label: "Info",
     url: "https://demos.telerik.com/kendo-react-ui/assets/layout/card/rila.jpg",
   },
   {
     thumbnailSrc: "/dog-wirehair-svgrepo-com.svg",
-    headerTitle: "What physical quirks do they have? 💪",
+    headerTitle: "What physical quirks do they have?",
     headerSubtitle: "Bulgaria, Europe",
     label: "Identity",
     url: "https://demos.telerik.com/kendo-react-ui/assets/layout/card/pamporovo.jpg",
   },
   {
     thumbnailSrc: "/dog-wirehair-svgrepo-com.svg",
-    headerTitle: "What behavioural quirks do they have? 🫠",
+    headerTitle: "What behavioural quirks do they have?",
     headerSubtitle: "Bulgaria, Europe",
     label: "Behavioral",
     url: "https://demos.telerik.com/kendo-react-ui/assets/layout/card/pamporovo.jpg",
   },
   {
     thumbnailSrc: "/dog-wirehair-svgrepo-com.svg",
-    headerTitle: "What Words and Commands does your pooch know? 🤓",
+    headerTitle: "What words and Ccommands does your pooch know?",
     headerSubtitle: "Bulgaria, Europe",
     label: "Words",
     url: "https://demos.telerik.com/kendo-react-ui/assets/layout/card/camping.jpg",
   },
   {
     thumbnailSrc: "/dog-wirehair-svgrepo-com.svg",
-    headerTitle: "Here's your report! 🐶",
+    headerTitle: "Here's your report!",
     label: "Report",
     url: "https://demos.telerik.com/kendo-react-ui/assets/layout/card/camping.jpg",
   },
@@ -648,7 +648,11 @@ export default function Home() {
                           priority
                         />
                         <h1
-                          style={{ marginBottom: "2px", paddingLeft: "22px" }}
+                          style={{
+                            marginBottom: "2px",
+                            paddingLeft: "22px",
+                            fontSize: "2.5rem",
+                          }}
                         >
                           {card.headerTitle}
                         </h1>
@@ -720,7 +724,7 @@ export default function Home() {
         </Dialog>
       )}
       <footer className={styles.footer}>
-        <p>Copyright © 2023 Progress Software. All rights reserved.</p>
+        <p>Copyright © 2025 BarkBoard MIT License. All rights reserved.</p>
       </footer>
     </div>
   );
