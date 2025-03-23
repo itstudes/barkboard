@@ -1,16 +1,25 @@
 "use client";
 
 import React, { useState } from "react";
-import { CardTitle, TileLayout, TileLayoutRepositionEvent } from "@progress/kendo-react-layout";
-import { daysTillBirthday, getWeightCategory, getAgeCategory } from "@/utils/dogUtils";
+import {
+  CardTitle,
+  TileLayout,
+  TileLayoutRepositionEvent,
+} from "@progress/kendo-react-layout";
+import {
+  daysTillBirthday,
+  getWeightCategory,
+  getAgeCategory,
+} from "@/utils/dogUtils";
 import { Dog } from "@/types/Dog";
-import NameTile  from './tiles/NameTile';
+import NameTile from "./tiles/NameTile";
 import BreedTile from "./tiles/BreedTile";
 import { toProperCase } from "@/utils/stringUtils";
 import GenderTile from "./tiles/GenderTile";
 import WeightTile from "./tiles/WeightTile";
 import CommandChipsTile from "./tiles/CommandsChipsTile";
 import QuirksTabbedTile from "./tiles/QuirksTabbedTile";
+import AgeTile from "./tiles/AgeTile";
 
 interface DogReportProps {
   dog: Dog;
@@ -23,74 +32,81 @@ const DogReport: React.FC<DogReportProps> = ({ dog }) => {
   const ageCategory = getAgeCategory(dog);
 
   // Split quirks by type
-  const appearanceQuirks = dog.physicalQuirks.filter(q => q.type === "appearance");
-  const medicalQuirks = dog.physicalQuirks.filter(q => q.type === "medical");
+  const appearanceQuirks = dog.physicalQuirks.filter(
+    (q) => q.type === "appearance"
+  );
+  const medicalQuirks = dog.physicalQuirks.filter((q) => q.type === "medical");
 
-  const generalAndPlay = dog.behaviorQuirks.filter(q => q.type === "general behavior" || q.type === "play");
-  const interactionQuirks = dog.behaviorQuirks.filter(q => q.type === "animal interaction" || q.type === "human interaction");
+  const generalAndPlay = dog.behaviorQuirks.filter(
+    (q) => q.type === "general behavior" || q.type === "play"
+  );
+  const interactionQuirks = dog.behaviorQuirks.filter(
+    (q) => q.type === "animal interaction" || q.type === "human interaction"
+  );
 
   // Define initial tile positions
-  const tilePositions = 
-  [
-    { col:1, colSpan: 2, row:1, rowSpan: 2}, // Name
-    { col: 5, colSpan: 4, row:1}, // Breed
-    { col:9, colSpan: 2, row:1}, // Gender
-    { col:5, colSpan: 2, row:2}, // Age
-    { col:7, colSpan: 4, row:2}, // Weight
-    { col:1, colSpan: 10, row:3, rowSpan: 3}, // Quirks
-    { col:1, colSpan: 10} // Commands
+  const tilePositions = [
+    { col: 1, colSpan: 5, row: 1, rowSpan: 2 }, // Name
+    { col: 6, colSpan: 3, row: 1 },            // Breed
+    { col: 9, colSpan: 2, row: 1 },            // Gender
+    { col: 6, colSpan: 3, row: 2 },            // Age
+    { col: 9, colSpan: 2, row: 2 },            // Weight
+    { col: 1, colSpan: 10, row: 3, rowSpan: 3 }, // Quirks
+    { col: 1, colSpan: 10, row: 6 }            // Commands
   ];
 
   // Define the tiles to render
   const tiles = [
     {
       header: <CardTitle>My name is</CardTitle>,
-      body: (
-        <NameTile name={dog.name} />
-      )
+      body: <NameTile name={dog.name} />,
     },
     {
-      header: <h3>{toProperCase(dog.breedInfo.size)} Breed</h3>,
-      body: (
-        <BreedTile breedName={dog.breedInfo.name} />
-      )
+      header: <CardTitle>{toProperCase(dog.breedInfo.size)} Breed</CardTitle>,
+      body: <BreedTile breedName={dog.breedInfo.name} />,
     },
     {
-      header: <h3>{toProperCase(dog.gender)}</h3>,
-      body: (
-        <GenderTile gender={dog.gender} />
-      )
+      header: <CardTitle>{toProperCase(dog.gender)}</CardTitle>,
+      body: <GenderTile gender={dog.gender} />,
     },
     {
-      header: <h3>{toProperCase(dog.gender)}</h3>,
+      header: <CardTitle>{toProperCase(getAgeCategory(dog))}</CardTitle>,
       body: (
-        <GenderTile gender={dog.gender} />
-      )
+        <AgeTile
+          birthday={dog.birthday}
+          birthdayTicks={dog.birthdayTicks}
+          age={dog.age}
+        />
+      ),
     },
     {
-      header: <h3>Weight</h3>,
+      header: <CardTitle>Weight</CardTitle>,
       body: (
-        <WeightTile weight={dog.weightKg} weightCategory={getWeightCategory(dog)} />
-      )
+        <WeightTile
+          weight={dog.weightKg}
+          weightCategory={getWeightCategory(dog)}
+        />
+      ),
     },
     {
-      header: <h3>My quirks</h3>,
+      header: <CardTitle>My quirks</CardTitle>,
       body: (
-        <QuirksTabbedTile behaviorQuirks={dog.behaviorQuirks} physicalQuirks={dog.physicalQuirks} />
-      )
+        <QuirksTabbedTile
+          behaviorQuirks={dog.behaviorQuirks}
+          physicalQuirks={dog.physicalQuirks}
+        />
+      ),
     },
     {
-      header: <h3>My dictionary</h3>,
-      body: (
-        <CommandChipsTile knownCommands={dog.knownCommands} />
-      )
-    }
+      header: <CardTitle>Human Words</CardTitle>,
+      body: <CommandChipsTile knownCommands={dog.knownCommands} />,
+    },
   ];
 
   return (
     <TileLayout
       columns={10}
-      rowHeight={160}
+      rowHeight={140}
       positions={tilePositions}
       gap={{ rows: 15, columns: 25 }}
       items={tiles}

@@ -10,4 +10,12 @@
   .big-emoji-text {
     font-size: var(--font-size-124);
   }
+
+  .k-card{
+    width: 100%;
+    height: 100%;
+  }
   
+  .k-card-title{
+    font-size: var(--font-size-24);
+  }

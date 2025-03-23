@@ -12,9 +12,9 @@ const DogQuirksGrid: React.FC<DogQuirksGridProps> = ({ data }) => {
   return (
     <div>
       {/* Header with total count on the top right */}
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '10px' }}>
+      {/* <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '10px' }}>
         <span style={{ fontWeight: 'bold' }}>Total: {data.length}</span>
-      </div>
+      </div> */}
       
       <Grid
         style={{ height: '475px' }}
