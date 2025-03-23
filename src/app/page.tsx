@@ -53,7 +53,6 @@ import {
   DropDownList,
   DropDownListChangeEvent,
 } from "@progress/kendo-react-dropdowns";
-import { groupBy } from "@progress/kendo-data-query";
 
 const defaultDogQuirk: DogQuirk[] = [];
 
@@ -63,7 +62,7 @@ const defaultDog: Dog = {
   name: "",
   breedInfo: {} as BreedInfo, // Adjust default values for BreedInfo as needed
   gender: "male", // Choose a default valid gender
-  birthday: new Date(),
+  birthday: new Date("2023-01-01"),
   birthdayTicks: 0,
   age: 0,
   weightKg: 0,
@@ -176,14 +175,16 @@ const cardsData = [
   {
     thumbnailSrc: "/dog-wirehair-svgrepo-com.svg",
     headerTitle: "Welcome to Barkboard 🫶",
-    headerSubtitle: "And we'll give you a free summary report of your pup!",
+    headerSubtitle:
+      "And we&apos;ll give you a free summary report of your pup!",
     label: "Welcome",
     url: "https://demos.telerik.com/kendo-react-ui/assets/layout/card/rila.jpg",
   },
   {
     thumbnailSrc: "/dog-wirehair-svgrepo-com.svg",
     headerTitle: "Tell us about your doggo 😄",
-    headerSubtitle: "And we'll give you a free summary report of your pup!",
+    headerSubtitle:
+      "And we&apos;ll give you a free summary report of your pup!",
     label: "Info",
     url: "https://demos.telerik.com/kendo-react-ui/assets/layout/card/rila.jpg",
   },
@@ -210,7 +211,7 @@ const cardsData = [
   },
   {
     thumbnailSrc: "/dog-wirehair-svgrepo-com.svg",
-    headerTitle: "Here's your report! 🐶",
+    headerTitle: "Here&apos;s your report! 🐶",
     label: "Report",
     url: "https://demos.telerik.com/kendo-react-ui/assets/layout/card/camping.jpg",
   },
@@ -360,14 +361,14 @@ export default function Home() {
                 This application generates a unique summary report detailing
                 your dog. It can be used to show off to your friends, to take
                 with to the vet, puppy training, or to show your pet sitter.
-                Simply follow the steps to enter your dog's information.
+                Simply follow the steps to enter your dog&apos;s information.
               </p>
               <p>
-                Once your dog's profile is complete, a permanent report URL is
-                created that you can share with your family and friends—it will
-                always be the same for your dog.
+                Once your dog&apos;s profile is complete, a permanent report URL
+                is created that you can share with your family and friends—it
+                will always be the same for your dog.
               </p>
-              <p>Click "Info" or "Next" to get started!</p>
+              <p>Click &quot;Info&quot; or &quot;Next&quot; to get started!</p>
             </div>
           </div>
         );
@@ -516,7 +517,7 @@ export default function Home() {
             <div className="k-pt-3 k-pl-5">
               <div>
                 <Label className="k-label k-font-bold">
-                  Please select all your dog's known Commands
+                  Please select all your dog&apos known Commands
                 </Label>
                 <ChipList
                   className="k-pt-5"
