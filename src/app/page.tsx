@@ -175,16 +175,14 @@ const cardsData = [
   {
     thumbnailSrc: "/dog-wirehair-svgrepo-com.svg",
     headerTitle: "Welcome to Barkboard 🫶",
-    headerSubtitle:
-      "And we&apos;ll give you a free summary report of your pup!",
+    headerSubtitle: "And we will give you a free summary report of your pup!",
     label: "Welcome",
     url: "https://demos.telerik.com/kendo-react-ui/assets/layout/card/rila.jpg",
   },
   {
     thumbnailSrc: "/dog-wirehair-svgrepo-com.svg",
     headerTitle: "Tell us about your doggo 😄",
-    headerSubtitle:
-      "And we&apos;ll give you a free summary report of your pup!",
+    headerSubtitle: "And we'll give you a free summary report of your pup!",
     label: "Info",
     url: "https://demos.telerik.com/kendo-react-ui/assets/layout/card/rila.jpg",
   },
@@ -211,7 +209,7 @@ const cardsData = [
   },
   {
     thumbnailSrc: "/dog-wirehair-svgrepo-com.svg",
-    headerTitle: "Here&apos;s your report! 🐶",
+    headerTitle: "Here's your report! 🐶",
     label: "Report",
     url: "https://demos.telerik.com/kendo-react-ui/assets/layout/card/camping.jpg",
   },
@@ -517,7 +515,7 @@ export default function Home() {
             <div className="k-pt-3 k-pl-5">
               <div>
                 <Label className="k-label k-font-bold">
-                  Please select all your dog&apos known Commands
+                  Please select all your dog&apos;s known Commands
                 </Label>
                 <ChipList
                   className="k-pt-5"
@@ -613,8 +611,8 @@ export default function Home() {
 
       <section className={styles.cardsSection}>
         <div className={styles.cardsWrapper}>
-          {/* <h5 className={styles.sectionTitle}>Let's get to know your pup 🐶</h5>
-          <p>And we'll give you a free summary report of your furbaby</p> */}
+          {/* <h5 className={styles.sectionTitle}>Let&apos;s get to know your pup 🐶</h5>
+          <p>And we&apos;ll give you a free summary report of your furbaby</p> */}
           <div className={styles.cardsContainer}>
             <div style={{ display: "flex", justifyContent: "space-evenly" }}>
               <div>
@@ -649,11 +647,11 @@ export default function Home() {
                           height={160}
                           priority
                         />
-                        <CardTitle
+                        <h1
                           style={{ marginBottom: "2px", paddingLeft: "22px" }}
                         >
                           {card.headerTitle}
-                        </CardTitle>
+                        </h1>
                         {/* <CardSubtitle>
                           <p>{card.headerSubtitle}</p>
                         </CardSubtitle> */}
