@@ -9,6 +9,7 @@ import {
   DatePicker,
   DatePickerChangeEvent,
 } from "@progress/kendo-react-dateinputs";
+import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
 
 import {
   CardFooter,
@@ -229,6 +230,7 @@ export default function Home() {
     dog: defaultDog,
     step: 0,
   });
+  const [reportError, setReportError] = React.useState<string | null>(null);
 
   // useEffect(() => {
   //   setCard(cardsData[step]);
@@ -335,7 +337,10 @@ export default function Home() {
     if (success && url) {
       window.open(url, "_blank");
     } else {
-      console.error("Failed to generate report URL", errors);
+      setReportError(
+        "Failed to generate report URL:\n" +
+          errors.map((e) => "• " + e.errorMessage).join("\n")
+      );
     }
   };
 
@@ -348,7 +353,21 @@ export default function Home() {
       case 0:
         return (
           <div className={styles.cardBody}>
-            <div>Welcome!!!</div>
+            <div className="k-pt-3 k-pl-5">
+              <h1>Hi there fellow dog owner</h1>
+              <p className="k-pt-3">
+                This application generates a unique summary report detailing
+                your dog. It can be used to show off to your friends, to take
+                with to the vet, puppy training, or to show your pet sitter.
+                Simply follow the steps to enter your dog's information.
+              </p>
+              <p>
+                Once your dog's profile is complete, a permanent report URL is
+                created that you can share with your family and friends—it will
+                always be the same for your dog.
+              </p>
+              <p>Click "Info" or "Next" to get started!</p>
+            </div>
           </div>
         );
       case 1:
@@ -660,6 +679,14 @@ export default function Home() {
         </div>
       </section>
 
+      {reportError && (
+        <Dialog title="⚠️ Error" onClose={() => setReportError(null)}>
+          <div style={{ whiteSpace: "pre-wrap" }}>{reportError}</div>
+          <DialogActionsBar>
+            <Button onClick={() => setReportError(null)}>Close</Button>
+          </DialogActionsBar>
+        </Dialog>
+      )}
       <footer className={styles.footer}>
         <p>Copyright © 2023 Progress Software. All rights reserved.</p>
       </footer>
