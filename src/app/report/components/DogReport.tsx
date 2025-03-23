@@ -32,12 +32,12 @@ const DogReport: React.FC<DogReportProps> = ({ dog }) => {
   // Define initial tile positions
   const tilePositions = 
   [
-    { col:1, colSpan: 4, rowSpan: 2}, // Name
-    { col: 5, colSpan: 4}, // Breed
-    { col:9, colSpan: 2}, // Gender
-    { col:5, colSpan: 2}, // Age
-    { col:7, colSpan: 4}, // Weight
-    { col:1, colSpan: 10, rowSpan: 3}, // Quirks
+    { col:1, colSpan: 2, row:1, rowSpan: 2}, // Name
+    { col: 5, colSpan: 4, row:1}, // Breed
+    { col:9, colSpan: 2, row:1}, // Gender
+    { col:5, colSpan: 2, row:2}, // Age
+    { col:7, colSpan: 4, row:2}, // Weight
+    { col:1, colSpan: 10, row:3, rowSpan: 3}, // Quirks
     { col:1, colSpan: 10} // Commands
   ];
 
@@ -84,120 +84,7 @@ const DogReport: React.FC<DogReportProps> = ({ dog }) => {
       body: (
         <CommandChipsTile knownCommands={dog.knownCommands} />
       )
-    },
-    // {
-    //   header: <h3>Stats & Fun Facts 🎉</h3>,
-    //   body: (
-    //     <div>
-    //       <h4>Age: {dog.age} years ({ageCategory})</h4>
-    //       <h4>Weight: {dog.weightKg} kg ({weightCategory})</h4>
-    //       <h4>
-    //         Birthday: {new Date(dog.birthday).toLocaleDateString()} 🎂{" "}
-    //         {daysUntilBirthday < 100 && (
-    //           <span>- Only {daysUntilBirthday} days until birthday!</span>
-    //         )}
-    //       </h4>
-    //     </div>
-    //   )
-    // },
-    // {
-    //   header: <h3>Physical Quirks</h3>,
-    //   body: (
-    //     <div className="row">
-    //       <div className="col-md-6">
-    //         <h4>Appearance</h4>
-    //         {appearanceQuirks.length > 0 ? (
-    //           <ul>
-    //             {appearanceQuirks.map(quirk => (
-    //               <li key={quirk.base2Id}>
-    //                 {quirk.iconName && <i className={quirk.iconName}></i>} {quirk.name}
-    //               </li>
-    //             ))}
-    //           </ul>
-    //         ) : (
-    //           <p>No appearance quirks.</p>
-    //         )}
-    //       </div>
-    //       <div className="col-md-6">
-    //         <h4>Medical</h4>
-    //         {medicalQuirks.length > 0 ? (
-    //           <ul>
-    //             {medicalQuirks.map(quirk => (
-    //               <li key={quirk.base2Id}>
-    //                 {quirk.iconName && <i className={quirk.iconName}></i>} {quirk.name}
-    //               </li>
-    //             ))}
-    //           </ul>
-    //         ) : (
-    //           <p>No medical quirks.</p>
-    //         )}
-    //       </div>
-    //     </div>
-    //   )
-    // },
-    // {
-    //   header: <h3>Behavior & Play 😎</h3>,
-    //   body: (
-    //     <div>
-    //       {generalAndPlay.length > 0 ? (
-    //         <ul>
-    //           {generalAndPlay.map(quirk => (
-    //             <li key={quirk.base2Id}>
-    //               {quirk.iconName && <i className={quirk.iconName}></i>} {quirk.name}
-    //             </li>
-    //           ))}
-    //         </ul>
-    //       ) : (
-    //         <p>No general or play quirks.</p>
-    //       )}
-    //     </div>
-    //   )
-    // },
-    // {
-    //   header: <h3>Interactions 🐾</h3>,
-    //   body: (
-    //     <div>
-    //       {interactionQuirks.length > 0 ? (
-    //         <ul>
-    //           {interactionQuirks.map(quirk => (
-    //             <li key={quirk.base2Id}>
-    //               {quirk.iconName && <i className={quirk.iconName}></i>} {quirk.name}
-    //             </li>
-    //           ))}
-    //         </ul>
-    //       ) : (
-    //         <p>No interaction quirks.</p>
-    //       )}
-    //     </div>
-    //   )
-    // },
-    // {
-    //   header: <h3>Commands & Radar Chart</h3>,
-    //   body: (
-    //     <div>
-    //       <ul>
-    //         {dog.knownCommands.map(command => (
-    //           <li key={command.base2Id}>
-    //             {command.name} – {command.expectation}
-    //           </li>
-    //         ))}
-    //       </ul>
-    //       <div
-    //         style={{
-    //           height: "200px",
-    //           border: "2px dashed #ccc",
-    //           borderRadius: "8px",
-    //           display: "flex",
-    //           justifyContent: "center",
-    //           alignItems: "center",
-    //           marginTop: "1rem",
-    //         }}
-    //       >
-    //         Radar Chart Coming Soon!
-    //       </div>
-    //     </div>
-    //   )
-    // }
+    }
   ];
 
   return (

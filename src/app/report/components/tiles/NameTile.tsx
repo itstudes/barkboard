@@ -10,7 +10,7 @@ interface NameTileProps {
 
 const NameTile: React.FC<NameTileProps> = ({ name }) => {
   return (
-    <div className="k-mv-0">
+    <div>
       <h1 className="tile-h1-text">{toProperCase(name)}</h1>
     </div>
   );
