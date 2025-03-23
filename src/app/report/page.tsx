@@ -9,7 +9,7 @@ interface ReportPageProps {
 
 export default async function ReportPage({ searchParams }: ReportPageProps) {
 
-  const awaitedSearchParams = await searchParams;
+  const awaitedSearchParams = searchParams;
 
   // Convert the raw searchParams using the getQueryParam utility.
   const params: ReportQueryParams = {
