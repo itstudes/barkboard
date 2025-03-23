@@ -1,5 +1,4 @@
-import { redirect } from "next/navigation";
-import { isValidDog, mapToDog, ReportQueryParams } from "@/app/report/queryParams";
+import { isValidDog, mapToDog } from "@/app/report/queryParams";
 import { getQueryParam } from "@/utils/queryUtils";
 import { NextResponse } from "next/server";
 
