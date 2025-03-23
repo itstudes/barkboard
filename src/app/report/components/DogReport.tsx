@@ -58,11 +58,11 @@ const DogReport: React.FC<DogReportProps> = ({ dog }) => {
   // Define the tiles to render
   const tiles = [
     {
-      header: <CardTitle>My name is</CardTitle>,
+      header: <CardTitle>My name is:</CardTitle>,
       body: <NameTile name={dog.name} />,
     },
     {
-      header: <CardTitle>{toProperCase(dog.breedInfo.size)} Breed</CardTitle>,
+      header: <CardTitle>I'm a {dog.breedInfo.size} breed.</CardTitle>,
       body: <BreedTile breedName={dog.breedInfo.name} />,
     },
     {
@@ -89,7 +89,7 @@ const DogReport: React.FC<DogReportProps> = ({ dog }) => {
       ),
     },
     {
-      header: <CardTitle>My quirks</CardTitle>,
+      header: <CardTitle>A bit about me:</CardTitle>,
       body: (
         <QuirksTabbedTile
           behaviorQuirks={dog.behaviorQuirks}
@@ -98,7 +98,7 @@ const DogReport: React.FC<DogReportProps> = ({ dog }) => {
       ),
     },
     {
-      header: <CardTitle>Human Words</CardTitle>,
+      header: <CardTitle>Words I know:</CardTitle>,
       body: <CommandChipsTile knownCommands={dog.knownCommands} />,
     },
   ];
