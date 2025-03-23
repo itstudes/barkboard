@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { isValidDog, mapToDog, ReportQueryParams } from "@/app/report/queryParams";
 import { getQueryParam } from "@/utils/queryUtils";
+import DogReport from "./components/DogReport";
 
 interface ReportPageProps {
   searchParams: { [key: string]: string | string[] | undefined };
@@ -33,9 +34,5 @@ export default async function ReportPage({ searchParams }: ReportPageProps) {
   // Map the validated parameters to a Dog object.
   const dog = mapToDog(params);
 
-  return (
-    <main style={{ padding: "1rem" }}>
-      <pre>{JSON.stringify(dog, null, 2)}</pre>
-    </main>
-  );
+  return <DogReport dog={dog} />;
 }

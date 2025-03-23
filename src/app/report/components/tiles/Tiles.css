@@ -1,0 +1,13 @@
+.tile-h1-text {
+    font-size: var(--font-size-84);
+
+  }
+
+  .tile-h2-text {
+    font-size: var(--font-size-64);
+  }
+
+  .big-emoji-text {
+    font-size: var(--font-size-124);
+  }
+  
