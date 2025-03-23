@@ -45,6 +45,7 @@ import { DogCommand } from "@/types/DogCommand";
 import { commands } from "@/constants/data/DogCommands";
 import { physicalQuirks, behavioralQuirks } from "@/constants/data/DogQuirks";
 import { breeds } from "@/constants/data/DogBreeds";
+import { tryBuildReportUrl } from "./report/queryParams";
 
 import {
   DropDownList,
@@ -156,21 +157,21 @@ const ungroupedBreedInfo = breeds.map((el) =>
 const cardsData = [
   {
     thumbnailSrc: "/dog-wirehair-svgrepo-com.svg",
-    headerTitle: "Welcome to Barkboard",
+    headerTitle: "Welcome to Barkboard 🫶",
     headerSubtitle: "And we'll give you a free summary report of your pup!",
     label: "Welcome",
     url: "https://demos.telerik.com/kendo-react-ui/assets/layout/card/rila.jpg",
   },
   {
     thumbnailSrc: "/dog-wirehair-svgrepo-com.svg",
-    headerTitle: "Tell us about your doggo",
+    headerTitle: "Tell us about your doggo 😄",
     headerSubtitle: "And we'll give you a free summary report of your pup!",
     label: "Summary",
     url: "https://demos.telerik.com/kendo-react-ui/assets/layout/card/rila.jpg",
   },
   {
     thumbnailSrc: "/dog-wirehair-svgrepo-com.svg",
-    headerTitle: "What Behavioural quirks do they have? 🫠",
+    headerTitle: "What behavioural quirks do they have? 🫠",
     headerSubtitle: "Bulgaria, Europe",
     label: "Quirks",
     url: "https://demos.telerik.com/kendo-react-ui/assets/layout/card/pamporovo.jpg",
@@ -293,6 +294,17 @@ export default function Home() {
         payload: { key: name, value: value },
       });
     };
+
+  const onClickGoToReport = () => {
+    const report_url = tryBuildReportUrl(state.dog);
+    console.log(report_url);
+    const { success, url, errors } = tryBuildReportUrl(state.dog);
+    if (success && url) {
+      window.open(url, "_blank");
+    } else {
+      console.error("Failed to generate report URL", errors);
+    }
+  };
 
   const handleReset = () => {
     dispatch({ type: "RESET" });
@@ -445,6 +457,13 @@ export default function Home() {
         return (
           <div className={styles.cardBody}>
             <div>Report!!!</div>
+            <Button
+              themeColor="primary"
+              fillMode="outline"
+              onClick={onClickGoToReport}
+            >
+              Gimme my report
+            </Button>
           </div>
         );
       default:
