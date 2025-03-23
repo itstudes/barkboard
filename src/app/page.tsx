@@ -86,7 +86,8 @@ type Action =
   | { type: "INCREMENT_STEP" }
   | { type: "DECREMENT_STEP" }
   | { type: "SET_KNOWN_COMMANDS"; payload: DogCommand[] }
-  | { type: "SET_BEHAVIOUR_QUIRKS"; payload: DogQuirk[] };
+  | { type: "SET_BEHAVIOUR_QUIRKS"; payload: DogQuirk[] }
+  | { type: "SET_PHYSICAL_QUIRKS"; payload: DogQuirk[] };
 
 function formReducer(state: State, action: Action): State {
   switch (action.type) {
@@ -127,6 +128,15 @@ function formReducer(state: State, action: Action): State {
         },
       };
     }
+    case "SET_PHYSICAL_QUIRKS": {
+      return {
+        ...state,
+        dog: {
+          ...state.dog,
+          physicalQuirks: action.payload,
+        },
+      };
+    }
     default:
       return state;
   }
@@ -139,6 +149,12 @@ const chipCommands = commands.map((command) => ({
 }));
 
 const chipBehavioralQuirks = behavioralQuirks.map((quirk) => ({
+  text: quirk.name,
+  value: quirk.name,
+  quirk: quirk,
+}));
+
+const chipPhysicalQuirks = physicalQuirks.map((quirk) => ({
   text: quirk.name,
   value: quirk.name,
   quirk: quirk,
@@ -166,36 +182,43 @@ const cardsData = [
     thumbnailSrc: "/dog-wirehair-svgrepo-com.svg",
     headerTitle: "Tell us about your doggo 😄",
     headerSubtitle: "And we'll give you a free summary report of your pup!",
-    label: "Summary",
+    label: "Info",
     url: "https://demos.telerik.com/kendo-react-ui/assets/layout/card/rila.jpg",
+  },
+  {
+    thumbnailSrc: "/dog-wirehair-svgrepo-com.svg",
+    headerTitle: "What physical quirks do they have? 💪",
+    headerSubtitle: "Bulgaria, Europe",
+    label: "Identity",
+    url: "https://demos.telerik.com/kendo-react-ui/assets/layout/card/pamporovo.jpg",
   },
   {
     thumbnailSrc: "/dog-wirehair-svgrepo-com.svg",
     headerTitle: "What behavioural quirks do they have? 🫠",
     headerSubtitle: "Bulgaria, Europe",
-    label: "Quirks",
+    label: "Behavioral",
     url: "https://demos.telerik.com/kendo-react-ui/assets/layout/card/pamporovo.jpg",
   },
   {
     thumbnailSrc: "/dog-wirehair-svgrepo-com.svg",
     headerTitle: "What Words and Commands does your pooch know? 🤓",
     headerSubtitle: "Bulgaria, Europe",
-    label: "Dictionary",
+    label: "Words",
     url: "https://demos.telerik.com/kendo-react-ui/assets/layout/card/camping.jpg",
   },
   {
     thumbnailSrc: "/dog-wirehair-svgrepo-com.svg",
     headerTitle: "Here's your QR code! 🐶",
-    label: "Your Report!",
+    label: "Report",
     url: "https://demos.telerik.com/kendo-react-ui/assets/layout/card/camping.jpg",
   },
 ];
 
 const genderOptions: Array<{ label: string; value: Dog["gender"] }> = [
   { label: "Male", value: "male" },
-  // { label: "Neutered Male", value: "male_neutered" },
+  { label: "Male ✂️", value: "male_neutered" },
   { label: "Female", value: "female" },
-  // { label: "Spayed Female", value: "female_spayed" },
+  { label: "Female ✂️", value: "female_spayed" },
 ];
 
 export default function Home() {
@@ -281,6 +304,16 @@ export default function Home() {
 
       if (selectedQuirks) {
         dispatch({ type: "SET_BEHAVIOUR_QUIRKS", payload: selectedQuirks });
+      }
+    } else if (name === "physicalQuirks") {
+      const selectedQuirks = chipPhysicalQuirks
+        .filter((chip) => selectedNames.includes(chip.value))
+        .map((chip) => chip.quirk);
+      console.log(selectedNames);
+      console.log(selectedQuirks);
+
+      if (selectedQuirks) {
+        dispatch({ type: "SET_PHYSICAL_QUIRKS", payload: selectedQuirks });
       }
     }
   };
@@ -412,11 +445,36 @@ export default function Home() {
           <div className={styles.cardBody}>
             <div className="k-pt-3 k-pl-5">
               <Label className="k-label k-font-bold">
-                Select the applicable quirks
+                Select the applicable physical quirks
               </Label>
               <div
                 style={{
                   maxHeight: "25vh",
+                  overflowY: "scroll",
+                  marginTop: "10px",
+                  marginBottom: "10px",
+                }}
+              >
+                <ChipList
+                  data={chipPhysicalQuirks}
+                  selection="multiple"
+                  onChange={handleChipChange("physicalQuirks")}
+                  value={state.dog.physicalQuirks.map((quirk) => quirk.name)}
+                />
+              </div>
+            </div>
+          </div>
+        );
+      case 3:
+        return (
+          <div className={styles.cardBody}>
+            <div className="k-pt-3 k-pl-5">
+              <Label className="k-label k-font-bold">
+                Select the applicable behavioral quirks
+              </Label>
+              <div
+                style={{
+                  maxHeight: "30vh",
                   overflowY: "scroll",
                   marginTop: "10px",
                   marginBottom: "10px",
@@ -432,7 +490,7 @@ export default function Home() {
             </div>
           </div>
         );
-      case 3:
+      case 4:
         return (
           <div className={styles.cardBody}>
             <div className="k-pt-3 k-pl-5">
@@ -453,7 +511,7 @@ export default function Home() {
             </div>
           </div>
         );
-      case 4:
+      case 5:
         return (
           <div className={styles.cardBody}>
             <div>Report!!!</div>
