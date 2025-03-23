@@ -202,7 +202,7 @@ const cardsData = [
   },
   {
     thumbnailSrc: "/dog-wirehair-svgrepo-com.svg",
-    headerTitle: "What words and Ccommands does your pooch know?",
+    headerTitle: "What words and commands does your pooch know?",
     headerSubtitle: "Bulgaria, Europe",
     label: "Words",
     url: "https://demos.telerik.com/kendo-react-ui/assets/layout/card/camping.jpg",
