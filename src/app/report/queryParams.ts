@@ -267,11 +267,85 @@ export function mapToDog(params: ReportQueryParams): Dog {
 }
 
 /**
- * Builds a /report URL with query parameters based on the provided ReportQueryParams object.
- * @param params The ReportQueryParams object containing the parameters.
- * @returns A string representing the full /report URL.
+ * Attempts to generate a ReportQueryParams object from a Dog object.
+ * 
+ * It first checks that the Dog's birthdayTicks is valid (>0 and a number).
+ * If not, it attempts to derive it from the Dog's birthday date.
+ * If neither value is valid, an error is returned.
+ * 
+ * Before returning, the generated ReportQueryParams are validated via isValidDog().
+ *
+ * @param dog The Dog object.
+ * @param breeds An array of valid BreedInfo objects.
+ * @param dogQuirks Constant collection of all DogQuirk options.
+ * @param dogCommands Constant collection of all DogCommand options.
+ * @returns An object containing a success flag, the generated ReportQueryParams, and any errors.
  */
-export function buildReportUrl(params: ReportQueryParams): string {
+export function tryGenerateQueryParams(dog: Dog): { success: boolean; result?: ReportQueryParams; errors: InvalidQueryItem[] } {
+  const errors: InvalidQueryItem[] = [];
+  
+  // Validate dog's birthdayTicks.
+  // It must be a valid number > 0. Otherwise, try to derive from the birthday Date.
+  let safeTicks = dog.birthdayTicks;
+  if (!safeTicks || isNaN(safeTicks) || safeTicks <= 0) {
+    if (dog.birthday instanceof Date && !isNaN(dog.birthday.getTime())) {
+      safeTicks = dog.birthday.getTime();
+    } else {
+      errors.push({
+        propertyName: "birthdayTicks",
+        errorMessage: "Invalid birthdayTicks and no birthday value",
+        fixAtStep: STEP_CORE_PARAMS, 
+      });
+    }
+  }
+  
+  // If there is an error regarding birthdayTicks, return early.
+  if (errors.length > 0) {
+    return { success: false, errors };
+  }
+  
+  // Build the ReportQueryParams object manually using the safeTicks value.
+  const queryParams: ReportQueryParams = {
+    name: dog.name,
+    breedId: String(dog.breedInfo.id),
+    gender: dog.gender,
+    ticks: String(safeTicks),
+    weightKg: String(dog.weightKg),
+    lang: dog.languageCode,
+    physicalQuirksBitmap: String(getBitmap(dog.physicalQuirks)),
+    behavioralQuirksBitmap: String(getBitmap(dog.behaviorQuirks)),
+    knownCommandsBitmap: String(getBitmap(dog.knownCommands)),
+  };
+  
+  // Validate the generated query parameters using the isValidDog() function.
+  const validation = isValidDog(queryParams);
+  if (!validation.isValid) {
+    return { success: false, result: queryParams, errors: validation.errors };
+  }
+  
+  return { success: true, result: queryParams, errors: [] };
+}
+
+/**
+ * Attempts to build a report URL from a Dog object.
+ * @param dog The Dog object.
+ * @returns An object containing a success flag, the generated URL, and any errors.
+ */
+export function tryBuildReportUrl(dog: Dog): { success: boolean; url?: string; errors: InvalidQueryItem[] } {
+  const { success, result, errors } = tryGenerateQueryParams(dog);
+  if (success && result) {
+    return { success, url: buildReportUrl(result), errors };
+  }
+  return { success, errors };
+}
+
+
+/**
+ * Builds a /report?{params} URL with query parameters based on the validated ReportQueryParams object.
+ * @param params The ReportQueryParams object containing the parameters.
+ * @returns A string representing the full /report?{params} URL.
+ */
+function buildReportUrl(params: ReportQueryParams): string {
   const searchParams = new URLSearchParams();
   // Iterate over each key in the params object.
   Object.keys(params).forEach((key) => {
