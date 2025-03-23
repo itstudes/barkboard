@@ -4,6 +4,7 @@ import Image from "next/image";
 import { SvgIcon } from "@progress/kendo-react-common";
 import { Button } from "@progress/kendo-react-buttons";
 import { Input, InputChangeEvent } from "@progress/kendo-react-inputs";
+import { Slider, SliderChangeEvent } from "@progress/kendo-react-inputs";
 import {
   DatePicker,
   DatePickerChangeEvent,
@@ -77,9 +78,10 @@ type State = {
 type Action =
   | {
       type: "UPDATE_ANSWER";
-      payload: { key: string; value: string | Date };
+      payload: { key: string; value: string | number | Date };
     }
   | { type: "RESET" }
+  | { type: "SET_STEP"; payload: number }
   | { type: "INCREMENT_STEP" }
   | { type: "DECREMENT_STEP" }
   | { type: "SET_KNOWN_COMMANDS"; payload: DogCommand[] }
@@ -100,6 +102,8 @@ function formReducer(state: State, action: Action): State {
       };
     case "RESET":
       return { dog: defaultDog, step: 0 };
+    case "SET_STEP":
+      return { ...state, step: action.payload };
     case "INCREMENT_STEP":
       return { ...state, step: state.step + 1 };
     case "DECREMENT_STEP":
@@ -152,6 +156,13 @@ const ungroupedBreedInfo = breeds.map((el) =>
 const cardsData = [
   {
     thumbnailSrc: "/dog-wirehair-svgrepo-com.svg",
+    headerTitle: "Welcome to Barkboard",
+    headerSubtitle: "And we'll give you a free summary report of your pup!",
+    label: "Welcome",
+    url: "https://demos.telerik.com/kendo-react-ui/assets/layout/card/rila.jpg",
+  },
+  {
+    thumbnailSrc: "/dog-wirehair-svgrepo-com.svg",
     headerTitle: "Tell us about your doggo",
     headerSubtitle: "And we'll give you a free summary report of your pup!",
     label: "Summary",
@@ -201,11 +212,7 @@ export default function Home() {
 
   const handleStepperChange = (e: StepperChangeEvent) => {
     const newValue = e.value;
-    if (newValue > state.step) {
-      dispatch({ type: "INCREMENT_STEP" });
-    } else if (newValue < state.step) {
-      dispatch({ type: "DECREMENT_STEP" });
-    }
+    dispatch({ type: "SET_STEP", payload: newValue });
   };
 
   const handleStepIncrement = (increment: number) => () => {
@@ -291,20 +298,17 @@ export default function Home() {
     dispatch({ type: "RESET" });
   };
 
-  // const handleSliderChange = (index: number) => (event: SliderChangeEvent) => {
-  //   const newAllocations = [...allocations];
-  //   newAllocations[index] = Math.round(event.value);
-  //   setAllocations(newAllocations);
-  // };
-
   const cardInputGroupings = (step: number) => {
     switch (step) {
       case 0:
         return (
-          <div
-            className={styles.cardBody}
-            style={{ justifyContent: "space-between" }}
-          >
+          <div className={styles.cardBody}>
+            <div>Welcome!!!</div>
+          </div>
+        );
+      case 1:
+        return (
+          <div className={styles.cardBody}>
             <div
               className="k-d-flex k-flex-row k-pt-3 k-pl-5"
               style={{ justifyContent: "left" }}
@@ -361,13 +365,37 @@ export default function Home() {
                   onClose={() => setOpened(false)}
                   onChange={handleDropDownChange("breedInfo")}
                   value={state.dog.breedInfo}
-                  // label="Select dog breed"
                 />
+              </div>
+            </div>
+            <div className="k-d-flex k-flex-column k-pt-10 k-pl-5">
+              <Label className="k-label k-font-bold">Weight</Label>
+              <div
+                className="k-d-flex k-flex-row"
+                style={{ justifyContent: "left" }}
+              >
+                <Slider
+                  min={1}
+                  max={110}
+                  value={state.dog.weightKg}
+                  style={{ width: "60%" }}
+                  onChange={(event: SliderChangeEvent) => {
+                    const value = Math.round(event.value) as number;
+                    dispatch({
+                      type: "UPDATE_ANSWER",
+                      payload: { key: "weightKg", value: value },
+                    });
+                  }}
+                />
+                <div className="k-pl-2">
+                  <strong>{state.dog.weightKg}</strong>
+                  {" kg"}
+                </div>
               </div>
             </div>
           </div>
         );
-      case 1:
+      case 2:
         return (
           <div className={styles.cardBody}>
             <div className="k-pt-3 k-pl-5">
@@ -392,21 +420,31 @@ export default function Home() {
             </div>
           </div>
         );
-      case 2:
+      case 3:
         return (
           <div className={styles.cardBody}>
-            <div>
-              <Label className="k-label k-font-bold">
-                Please select all your dog's known Commands
-              </Label>
-              <ChipList
-                className="k-pt-5"
-                data={chipCommands}
-                selection="multiple"
-                onChange={handleChipChange("knownCommands")}
-                value={state.dog.knownCommands.map((commands) => commands.name)}
-              />
+            <div className="k-pt-3 k-pl-5">
+              <div>
+                <Label className="k-label k-font-bold">
+                  Please select all your dog's known Commands
+                </Label>
+                <ChipList
+                  className="k-pt-5"
+                  data={chipCommands}
+                  selection="multiple"
+                  onChange={handleChipChange("knownCommands")}
+                  value={state.dog.knownCommands.map(
+                    (commands) => commands.name
+                  )}
+                />
+              </div>
             </div>
+          </div>
+        );
+      case 4:
+        return (
+          <div className={styles.cardBody}>
+            <div>Report!!!</div>
           </div>
         );
       default:
@@ -416,9 +454,9 @@ export default function Home() {
 
   return (
     <div className={styles.page}>
-      <header className={styles.header}>
+      {/* <header className={styles.header}>
         <h2>Bark-board</h2>
-        {/* <div>
+        <div>
           <Button themeColor="primary" fillMode="flat" className="k-mr-1">
             Home
           </Button>
@@ -429,13 +467,14 @@ export default function Home() {
           >
             Grid
           </Button>
-        </div> */}
-      </header>
+        </div>
+      </header> */}
       {/* <div className={styles.container}>
         <Image
+          style={{ marginTop: -100 }}
           className={styles.logoImage}
           src={card.thumbnailSrc}
-          alt="React Logo"
+          alt="logo"
           width={886}
           height={788}
           priority
@@ -444,8 +483,8 @@ export default function Home() {
 
       <section className={styles.cardsSection}>
         <div className={styles.cardsWrapper}>
-          <h5 className={styles.sectionTitle}>Let's get to know your pup 🐶</h5>
-          <p>And we'll give you a free summary report of your furbaby</p>
+          {/* <h5 className={styles.sectionTitle}>Let's get to know your pup 🐶</h5>
+          <p>And we'll give you a free summary report of your furbaby</p> */}
           <div className={styles.cardsContainer}>
             <div style={{ display: "flex", justifyContent: "space-evenly" }}>
               <div>

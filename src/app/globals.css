@@ -62,7 +62,8 @@ a {
 
 .k-card {
   width: 65vw;
-  height: 85vh;
+  height: 90vh;
+  max-height: 800px;
 }
 
 nav.k-stepper {
