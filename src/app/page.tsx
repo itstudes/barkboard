@@ -3,7 +3,18 @@ import React, { useEffect, useReducer } from "react";
 import Image from "next/image";
 import { SvgIcon } from "@progress/kendo-react-common";
 import { Button } from "@progress/kendo-react-buttons";
-import { Stepper, StepperChangeEvent } from "@progress/kendo-react-layout";
+import { Input, InputChangeEvent } from "@progress/kendo-react-inputs";
+import {
+  DatePicker,
+  DatePickerChangeEvent,
+} from "@progress/kendo-react-dateinputs";
+
+import {
+  CardFooter,
+  CardImage,
+  Stepper,
+  StepperChangeEvent,
+} from "@progress/kendo-react-layout";
 import {
   Card,
   CardHeader,
@@ -13,102 +24,160 @@ import {
   CardSubtitle,
   // Avatar,
 } from "@progress/kendo-react-layout";
+import { ChipList, ChipListChangeEvent } from "@progress/kendo-react-buttons";
 
 import styles from "./page.module.css";
 
 import { useRouter } from "next/navigation";
 
-import { chevronRightIcon } from "@progress/kendo-svg-icons";
+import { chevronRightIcon, chevronLeftIcon } from "@progress/kendo-svg-icons";
 import {
   RadioGroup,
   RadioGroupChangeEvent,
 } from "@progress/kendo-react-inputs";
 import { Label } from "@progress/kendo-react-labels";
+import { BreedInfo } from "@/types/BreedInfo";
 
-type Answers = {
-  [key: string]: string;
+import { Dog } from "@/types/Dog";
+import { DogQuirk } from "@/types/DogQuirk";
+import { DogCommand } from "@/types/DogCommand";
+import { commands } from "@/constants/data/DogCommands";
+
+const defaultDogQuirk: DogQuirk[] = [];
+
+const defaultDogCommand: DogCommand[] = [
+  //   {
+  //   base2Id: 0,
+  //   name: "",
+  //   expectation: "appearance",
+  //   type: "obedience",
+  //   similarToCommandsBitMap: 0
+  // }
+];
+
+const defaultDog: Dog = {
+  name: "",
+  breedInfo: {} as BreedInfo, // Adjust default values for BreedInfo as needed
+  gender: "male", // Choose a default valid gender
+  birthday: new Date(),
+  birthdayTicks: 0,
+  age: 0,
+  weightKg: 0,
+  languageCode: "",
+  physicalQuirks: defaultDogQuirk,
+  behaviorQuirks: defaultDogQuirk,
+  knownCommands: defaultDogCommand,
 };
 
+// const defaultDogCommands: DogCommand[] = commands as DogCommand[];
+
 type State = {
-  answers: Answers;
+  dog: Dog;
   step: number;
 };
 
 type Action =
   | {
       type: "UPDATE_ANSWER";
-      payload: { key: string; value: string; isLastQuestion?: boolean };
+      payload: { key: string; value: string | Date; isLastQuestion?: boolean };
     }
   | { type: "RESET" }
   | { type: "INCREMENT_STEP" }
-  | { type: "DECREMENT_STEP" };
+  | { type: "DECREMENT_STEP" }
+  | { type: "TOGGLE_KNOWN_COMMAND"; payload: DogCommand };
 
 function formReducer(state: State, action: Action): State {
   switch (action.type) {
     case "UPDATE_ANSWER":
       return {
-        answers: {
-          ...state.answers,
+        dog: {
+          ...state.dog,
           [action.payload.key]: action.payload.value,
         },
         // Increment the step counter if this is the last question of the current step
         step: action.payload.isLastQuestion ? state.step + 1 : state.step,
       };
     case "RESET":
-      return { answers: {}, step: 0 };
+      return { dog: defaultDog, step: 0 };
     case "INCREMENT_STEP":
       return { ...state, step: state.step + 1 };
     case "DECREMENT_STEP":
       return { ...state, step: state.step > 0 ? state.step - 1 : 0 };
+    case "TOGGLE_KNOWN_COMMAND": {
+      const command = action.payload;
+      const isAlreadyKnown = state.dog.knownCommands.some(
+        (cmd) => cmd.name === command.name
+      );
+      return {
+        ...state,
+        dog: {
+          ...state.dog,
+          knownCommands: isAlreadyKnown
+            ? state.dog.knownCommands.filter((cmd) => cmd.name !== command.name)
+            : [...state.dog.knownCommands, command],
+        },
+      };
+    }
     default:
       return state;
   }
 }
 
+const chipCommands = commands.map((command) => ({
+  text: command.name,
+  value: command.name,
+}));
+
 const cardsData = [
   {
-    thumbnailSrc:
-      "https://demos.telerik.com/kendo-react-ui/assets/layout/card/rila_lakes.jpg",
-    headerTitle: "Tell us about your pdooch 🥹",
-    headerSubtitle: "Bulgaria, Europe",
+    thumbnailSrc: "/dog-wirehair-svgrepo-com.svg",
+    headerTitle: "Tell us about your doggo",
+    headerSubtitle: "And we'll give you a free summary report of your pup!",
     label: "Summary",
     url: "https://demos.telerik.com/kendo-react-ui/assets/layout/card/rila.jpg",
   },
   {
-    thumbnailSrc:
-      "https://demos.telerik.com/kendo-react-ui/assets/layout/card/rila_lakes.jpg",
+    thumbnailSrc: "/dog-wirehair-svgrepo-com.svg",
     headerTitle: "What Quirks and Suchf? 🫠",
     headerSubtitle: "Bulgaria, Europe",
-    label: "Physical Quirks",
+    label: "Quirks",
     url: "https://demos.telerik.com/kendo-react-ui/assets/layout/card/pamporovo.jpg",
   },
   {
-    thumbnailSrc:
-      "https://demos.telerik.com/kendo-react-ui/assets/layout/card/rila_lakes.jpg",
+    thumbnailSrc: "/dog-wirehair-svgrepo-com.svg",
     headerTitle: "What Words and Commands does your pooch know? 🤓",
     headerSubtitle: "Bulgaria, Europe",
     label: "Dictionary",
     url: "https://demos.telerik.com/kendo-react-ui/assets/layout/card/camping.jpg",
   },
   {
-    thumbnailSrc:
-      "https://demos.telerik.com/kendo-react-ui/assets/layout/card/rila_lakes.jpg",
+    thumbnailSrc: "/dog-wirehair-svgrepo-com.svg",
     headerTitle: "Here's your QR code! 🐶",
     label: "Your Report!",
     url: "https://demos.telerik.com/kendo-react-ui/assets/layout/card/camping.jpg",
   },
 ];
 
-const genderOptions = [
-  { label: "Good Boy", value: "male" },
-  { label: "Good Girl", value: "female" },
-  { label: "Just a good pooch", value: "other" },
+// const defaultDogCommands: Array<{
+//   name: "sit";
+//   expectation: "The dog sits calmly where it was.";
+//   similarToCommandsBitMap: 2;
+//   type: "obedience";
+// }> = [
+//   commands.map
+// ]
+
+const genderOptions: Array<{ label: string; value: Dog["gender"] }> = [
+  { label: "Male", value: "male" },
+  // { label: "Neutered Male", value: "male_neutered" },
+  { label: "Female", value: "female" },
+  // { label: "Spayed Female", value: "female_spayed" },
 ];
 
 export default function Home() {
   const router = useRouter();
   const [state, dispatch] = useReducer(formReducer, {
-    answers: { gender: "" },
+    dog: defaultDog,
     step: 0,
   });
 
@@ -125,27 +194,149 @@ export default function Home() {
     }
   };
 
+  const handleStepIncrement = (increment: number) => () => {
+    if (increment == 1) {
+      dispatch({ type: "INCREMENT_STEP" });
+    } else if (increment == -1) {
+      dispatch({ type: "DECREMENT_STEP" });
+    }
+  };
+
   const card = cardsData[state.step];
 
   const labelOnly = cardsData.map((card, index) => {
     return { label: card.label };
   });
 
-  const handleRadioChange = (name: string) => (event: RadioGroupChangeEvent) => {
-    const { value } = event;
-    const isLastQuestion = false;
+  const handleRadioChange =
+    (name: string) => (event: RadioGroupChangeEvent) => {
+      const { value } = event;
+      const isLastQuestion = false;
+      console.log(name);
+      console.log(value);
+      dispatch({
+        type: "UPDATE_ANSWER",
+        payload: { key: name, value, isLastQuestion: isLastQuestion },
+      });
+    };
+
+  const handleDateChange = (event: DatePickerChangeEvent) => {
+    const value = event.target.value as Date;
+    const name = event.target.name as string;
 
     console.log(name);
+    console.log(typeof event.value);
+    console.log(event.value);
     console.log(value);
+    const isLastQuestion = false;
 
     dispatch({
-      type: 'UPDATE_ANSWER',
+      type: "UPDATE_ANSWER",
       payload: { key: name, value, isLastQuestion: isLastQuestion },
     });
   };
 
+  const handleInputChange = (event: InputChangeEvent) => {
+    const name = event.target.name as string;
+    const value = event.target.value as string;
+
+    const isLastQuestion = false;
+
+    dispatch({
+      type: "UPDATE_ANSWER",
+      payload: { key: name, value, isLastQuestion: isLastQuestion },
+    });
+  };
+
+  const handleChipChange = (event: ChipListChangeEvent) => {
+    const value = event.value as string;
+    const commandObj = commands.find((c) => c.name === value);
+    if (commandObj) {
+      dispatch({ type: "TOGGLE_KNOWN_COMMAND", payload: commandObj });
+    }
+  };
+
   const handleReset = () => {
     dispatch({ type: "RESET" });
+  };
+
+  const cardInputGroupings = (step: number) => {
+    switch (step) {
+      case 0:
+        return (
+          <div
+            className={styles.cardBody}
+            style={{ justifyContent: "space-between" }}
+          >
+            <div
+              className="k-d-flex k-flex-row  k-pt-5 k-pl-5"
+              style={{ justifyContent: "left" }}
+            >
+              <div className="k-pr-10">
+                <Label className="k-label">Name</Label>
+                <Input
+                  name="name"
+                  value={state.dog.name}
+                  onChange={handleInputChange}
+                  placeholder={"Sir Barksalot"}
+                  style={{ width: "100%" }}
+                />
+              </div>
+              <div>
+                <Label className="k-label">Gender</Label>
+                <RadioGroup
+                  name="gender"
+                  layout="horizontal"
+                  data={genderOptions}
+                  value={state.dog.gender}
+                  onChange={handleRadioChange("gender")}
+                />
+              </div>
+            </div>
+            <div className="k-pl-5 k-pv-10">
+              <Label editorId="date">Select date</Label>
+              <DatePicker
+                id="date"
+                value={state.dog.birthday}
+                onChange={handleDateChange}
+              />
+            </div>
+          </div>
+        );
+      case 1:
+        return (
+          <div className={styles.cardBody}>
+            <div>
+              <Label className="k-label">Quirks</Label>
+
+              <ChipList
+                data={chipCommands}
+                selection="multiple"
+                onChange={handleChipChange}
+                // value={value}
+              />
+            </div>
+          </div>
+        );
+      case 2:
+        return (
+          <div className={styles.cardBody}>
+            <div>
+              <Label className="k-label">
+                Please select all your dog's known Commands
+              </Label>
+              <ChipList
+                data={chipCommands}
+                selection="multiple"
+                onChange={handleChipChange}
+                // value={}
+              />
+            </div>
+          </div>
+        );
+      default:
+        break;
+    }
   };
 
   return (
@@ -165,85 +356,23 @@ export default function Home() {
           </Button>
         </div>
       </header>
-      <div className={styles.container}>
+      {/* <div className={styles.container}>
         <Image
-          className={styles.reactLogo}
-          src="/react.svg"
+          className={styles.logoImage}
+          src={card.thumbnailSrc}
           alt="React Logo"
           width={886}
           height={788}
           priority
         />
-        <div className="k-d-flex k-flex-col">
-          <h1 className={styles.title}>Hey Tudes</h1>
-          <h3 className={styles.subtitle}>
-            Comprehensive React UI Component Library
-          </h3>
-          <div className="k-mt-3">
-            <Button themeColor="primary" className="k-mr-2">
-              <a href="https://www.telerik.com/kendo-react-ui" target="_blank">
-                Try KendoReact
-              </a>
-            </Button>
-            <Button themeColor="secondary" fillMode="solid">
-              <a href="https://vercel.com/" target="_blank">
-                More about Next.js
-              </a>
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      <section className={styles.section}>
-        <div className={styles.container}>
-          <div className="k-pl-8">
-            <h5 className={styles.sectionTitle}>Get started</h5>
-            <p>
-              Edit index page at or set up data source at{" "}
-              <code>src/pages/index.jsx</code> or set up data source at{" "}
-              <code>kendo/data.json</code>
-            </p>
-          </div>
-        </div>
-      </section>
+      </div> */}
 
       <section className={styles.cardsSection}>
         <div className={styles.cardsWrapper}>
-          <h5 className={styles.sectionTitle}>Highlights</h5>
+          <h5 className={styles.sectionTitle}>Let's get to know your pup 🐶</h5>
+          <p>And we'll give you a free summary report of your furbaby</p>
           <div className={styles.cardsContainer}>
-            {/* <Card className={styles.card}>
-              <CardHeader className={styles.cardHeader}>
-                <Image
-                  src="/classroom.svg"
-                  alt="Virtual Classroom Logo"
-                  width={64}
-                  height={64}
-                  priority
-                />
-                <CardTitle className={styles.cardTitle}>
-                  Virtual Classroom
-                </CardTitle>
-              </CardHeader>
-              <CardBody>
-                <p className={styles.cardBody}>
-                  Need to quickly get started with KendoReact or just prefer
-                  video on-boarding materials we have Virtual Classroom for you.
-                </p>
-              </CardBody>
-              <CardActions>
-                <Button themeColor="primary" fillMode="flat">
-                  <a href="https://rb.gy/w21cc8" target="_blank">
-                    Get Started
-                  </a>
-                </Button>
-              </CardActions>
-            </Card> */}
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-evenly",
-              }}
-            >
+            <div style={{ display: "flex", justifyContent: "space-evenly" }}>
               <div>
                 <Card
                   style={{
@@ -253,50 +382,84 @@ export default function Home() {
                   }}
                 >
                   <CardHeader className={styles.cardHeader}>
-                    <div className="k-d-flex k-flex-row">
-                      <div>
+                    <div
+                      className="k-d-flex k-flex-row"
+                      style={{
+                        justifyContent: "space-between",
+                        padding: "10px",
+                      }}
+                    >
+                      <div
+                        className="k-d-flex k-flex-row"
+                        style={{
+                          // justifyContent: "center",
+                          alignItems: "center",
+                          padding: "15px",
+                        }}
+                      >
                         <Image
-                          src="/classroom.svg"
-                          alt="Virtual Classroom Logo"
-                          width={100}
-                          height={100}
+                          //src = {card.headerImage}
+                          src="/dog-breed-svgrepo-com.svg"
+                          alt="dog-breed-svgrepo-com.svg"
+                          width={180}
+                          height={180}
                           priority
                         />
-                        <CardTitle style={{ marginBottom: "4px" }}>
+                        <CardTitle
+                          style={{ marginBottom: "2px", paddingLeft: "20px" }}
+                        >
                           {card.headerTitle}
                         </CardTitle>
-                        <CardSubtitle>
+                        {/* <CardSubtitle>
                           <p>{card.headerSubtitle}</p>
-                        </CardSubtitle>
+                        </CardSubtitle> */}
                       </div>
-                      <CardActions>
-                        <Button themeColor="primary" fillMode="flat">
-                          <SvgIcon icon={chevronRightIcon} size="large" />
-                        </Button>
-                      </CardActions>
                     </div>
                   </CardHeader>
-                  <CardBody>
-                    <div className={styles.cardBody}>
-                      <div>
-                        <Label className="k-label">Payment Method</Label>
-                        <RadioGroup
-                          name="gender"
-                          data={genderOptions}
-                          value={state.answers.gender}
-                          onChange={handleRadioChange("gender")}
-                        />
-                      </div>
+                  <CardBody>{cardInputGroupings(state.step)}</CardBody>
+                  <CardFooter>
+                    <div
+                      className="k-d-flex k-flex-row"
+                      style={{
+                        margin: "10px",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <Button
+                        style={{
+                          opacity: state.step != 0 ? 100 : 0,
+                        }}
+                        themeColor="primary"
+                        fillMode="flat"
+                        className="roundButton"
+                        onClick={handleStepIncrement(-1)}
+                        disabled={state.step == 0}
+                      >
+                        <SvgIcon icon={chevronLeftIcon} size="large" />
+                      </Button>
+
+                      <Stepper
+                        // className="my_stepper"
+                        value={state.step}
+                        onChange={handleStepperChange}
+                        mode={"labels"}
+                        items={labelOnly}
+                      />
+                      <Button
+                        style={{
+                          opacity: state.step != cardsData.length - 1 ? 100 : 0,
+                        }}
+                        themeColor="primary"
+                        fillMode="flat"
+                        className="roundButton"
+                        onClick={handleStepIncrement(1)}
+                        disabled={state.step == cardsData.length - 1}
+                      >
+                        <SvgIcon icon={chevronRightIcon} size="large" />
+                      </Button>
                     </div>
-                  </CardBody>
-                  <div style={{ margin: "10px" }}>
-                    <Stepper
-                      value={state.step}
-                      onChange={handleStepperChange}
-                      mode={"labels"}
-                      items={labelOnly}
-                    />
-                  </div>
+                  </CardFooter>
                 </Card>
               </div>
             </div>
