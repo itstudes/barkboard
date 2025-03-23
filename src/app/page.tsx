@@ -43,22 +43,17 @@ import { DogQuirk } from "@/types/DogQuirk";
 import { DogCommand } from "@/types/DogCommand";
 import { commands } from "@/constants/data/DogCommands";
 import { physicalQuirks, behavioralQuirks } from "@/constants/data/DogQuirks";
+import { breeds } from "@/constants/data/DogBreeds";
+
 import {
-  MultiSelect,
-  MultiSelectChangeEvent,
+  DropDownList,
+  DropDownListChangeEvent,
 } from "@progress/kendo-react-dropdowns";
+import { groupBy } from "@progress/kendo-data-query";
 
 const defaultDogQuirk: DogQuirk[] = [];
 
-const defaultDogCommand: DogCommand[] = [
-  //   {
-  //   base2Id: 0,
-  //   name: "",
-  //   expectation: "appearance",
-  //   type: "obedience",
-  //   similarToCommandsBitMap: 0
-  // }
-];
+const defaultDogCommand: DogCommand[] = [];
 
 const defaultDog: Dog = {
   name: "",
@@ -74,8 +69,6 @@ const defaultDog: Dog = {
   knownCommands: defaultDogCommand,
 };
 
-// const defaultDogCommands: DogCommand[] = commands as DogCommand[];
-
 type State = {
   dog: Dog;
   step: number;
@@ -89,12 +82,13 @@ type Action =
   | { type: "RESET" }
   | { type: "INCREMENT_STEP" }
   | { type: "DECREMENT_STEP" }
-  | { type: "TOGGLE_KNOWN_COMMAND"; payload: DogCommand }
-  | { type: "TOGGLE_BEHAVIOUR_QUIRKS"; payload: DogQuirk };
+  | { type: "SET_KNOWN_COMMANDS"; payload: DogCommand[] }
+  | { type: "SET_BEHAVIOUR_QUIRKS"; payload: DogQuirk[] };
 
 function formReducer(state: State, action: Action): State {
   switch (action.type) {
     case "UPDATE_ANSWER":
+      console.log(action.payload.value);
       return {
         ...state,
         dog: {
@@ -110,33 +104,21 @@ function formReducer(state: State, action: Action): State {
       return { ...state, step: state.step + 1 };
     case "DECREMENT_STEP":
       return { ...state, step: state.step > 0 ? state.step - 1 : 0 };
-    case "TOGGLE_KNOWN_COMMAND": {
-      const command = action.payload;
-      const isAlreadyKnown = state.dog.knownCommands.some(
-        (cmd) => cmd.name === command.name
-      );
+    case "SET_KNOWN_COMMANDS": {
       return {
         ...state,
         dog: {
           ...state.dog,
-          knownCommands: isAlreadyKnown
-            ? state.dog.knownCommands.filter((cmd) => cmd.name !== command.name)
-            : [...state.dog.knownCommands, command],
+          knownCommands: action.payload,
         },
       };
     }
-    case "TOGGLE_BEHAVIOUR_QUIRKS": {
-      const quirk = action.payload;
-      const isAlreadyKnown = state.dog.behaviorQuirks.some(
-        (cmd) => cmd.name === quirk.name
-      );
+    case "SET_BEHAVIOUR_QUIRKS": {
       return {
         ...state,
         dog: {
           ...state.dog,
-          behaviorQuirks: isAlreadyKnown
-            ? state.dog.behaviorQuirks.filter((cmd) => cmd.name !== quirk.name)
-            : [...state.dog.behaviorQuirks, quirk],
+          behaviorQuirks: action.payload,
         },
       };
     }
@@ -148,12 +130,24 @@ function formReducer(state: State, action: Action): State {
 const chipCommands = commands.map((command) => ({
   text: command.name,
   value: command.name,
+  command: command,
 }));
 
 const chipBehavioralQuirks = behavioralQuirks.map((quirk) => ({
   text: quirk.name,
   value: quirk.name,
+  quirk: quirk,
 }));
+
+const ungroupedBreedInfo = breeds.map((el) =>
+  el.size
+    ? {
+        ...el,
+        size_text:
+          el.size.charAt(0).toUpperCase() + el.size.substring(1).toLowerCase(),
+      }
+    : { ...el, size_text: "unknown" }
+);
 
 const cardsData = [
   {
@@ -185,15 +179,6 @@ const cardsData = [
   },
 ];
 
-// const defaultDogCommands: Array<{
-//   name: "sit";
-//   expectation: "The dog sits calmly where it was.";
-//   similarToCommandsBitMap: 2;
-//   type: "obedience";
-// }> = [
-//   commands.map
-// ]
-
 const genderOptions: Array<{ label: string; value: Dog["gender"] }> = [
   { label: "Male", value: "male" },
   // { label: "Neutered Male", value: "male_neutered" },
@@ -203,6 +188,8 @@ const genderOptions: Array<{ label: string; value: Dog["gender"] }> = [
 
 export default function Home() {
   const router = useRouter();
+  const [opened, setOpened] = React.useState(false);
+
   const [state, dispatch] = useReducer(formReducer, {
     dog: defaultDog,
     step: 0,
@@ -265,24 +252,50 @@ export default function Home() {
   };
 
   const handleChipChange = (name: string) => (event: ChipListChangeEvent) => {
-    const value = event.value as string;
-    console.log(name);
+    const selectedNames = Array.isArray(event.value)
+      ? event.value
+      : [event.value];
     if (name == "knownCommands") {
-      const commandObj = commands.find((c) => c.name === value);
-      if (commandObj) {
-        dispatch({ type: "TOGGLE_KNOWN_COMMAND", payload: commandObj });
+      const selectedCommands = chipCommands
+        .filter((chip) => selectedNames.includes(chip.value))
+        .map((chip) => chip.command);
+      console.log(selectedNames);
+      console.log(selectedCommands);
+      if (selectedCommands) {
+        dispatch({ type: "SET_KNOWN_COMMANDS", payload: selectedCommands });
       }
     } else if (name === "behaviorQuirks") {
-      const quirksObj = behavioralQuirks.find((c) => c.name === value);
-      if (quirksObj) {
-        dispatch({ type: "TOGGLE_BEHAVIOUR_QUIRKS", payload: quirksObj });
+      const selectedQuirks = chipBehavioralQuirks
+        .filter((chip) => selectedNames.includes(chip.value))
+        .map((chip) => chip.quirk);
+      console.log(selectedNames);
+      console.log(selectedQuirks);
+
+      if (selectedQuirks) {
+        dispatch({ type: "SET_BEHAVIOUR_QUIRKS", payload: selectedQuirks });
       }
     }
   };
 
+  const handleDropDownChange =
+    (name: string) => (event: DropDownListChangeEvent) => {
+      let value = event.target.value;
+      console.log(value);
+      dispatch({
+        type: "UPDATE_ANSWER",
+        payload: { key: name, value: value },
+      });
+    };
+
   const handleReset = () => {
     dispatch({ type: "RESET" });
   };
+
+  // const handleSliderChange = (index: number) => (event: SliderChangeEvent) => {
+  //   const newAllocations = [...allocations];
+  //   newAllocations[index] = Math.round(event.value);
+  //   setAllocations(newAllocations);
+  // };
 
   const cardInputGroupings = (step: number) => {
     switch (step) {
@@ -293,7 +306,7 @@ export default function Home() {
             style={{ justifyContent: "space-between" }}
           >
             <div
-              className="k-d-flex k-flex-row  k-pt-5 k-pl-5"
+              className="k-d-flex k-flex-row k-pt-3 k-pl-5"
               style={{ justifyContent: "left" }}
             >
               <div className="k-pr-10" style={{ width: "60%" }}>
@@ -317,37 +330,63 @@ export default function Home() {
                 />
               </div>
             </div>
-            <div className="k-pl-5 k-pt-10" style={{ width: "35%" }}>
-              <Label editorId="date" className="k-label k-font-bold">
-                Select birth date
-              </Label>
-              <DatePicker
-                id="date"
-                value={state.dog.birthday}
-                onChange={handleDateChange}
-              />
+            <div
+              className="k-d-flex k-flex-row k-pt-10 k-pl-5"
+              style={{ justifyContent: "left", alignItems: "center" }}
+            >
+              <div style={{ width: "40%" }}>
+                <Label editorId="date" className="k-label k-font-bold">
+                  Select birth date
+                </Label>
+                <DatePicker
+                  id="date"
+                  name="birthday"
+                  value={state.dog.birthday}
+                  onChange={handleDateChange}
+                />
+              </div>
+              <div
+                className="k-d-flex k-flex-column k-pl-10"
+                style={{ width: "45%" }}
+              >
+                <Label editorId="date" className="k-label k-font-bold">
+                  Select breed
+                </Label>
+                <DropDownList
+                  data={ungroupedBreedInfo}
+                  textField="name"
+                  groupField="size_text"
+                  opened={opened}
+                  onOpen={() => setOpened(true)}
+                  onClose={() => setOpened(false)}
+                  onChange={handleDropDownChange("breedInfo")}
+                  value={state.dog.breedInfo}
+                  // label="Select dog breed"
+                />
+              </div>
             </div>
           </div>
         );
       case 1:
         return (
           <div className={styles.cardBody}>
-            <div>
+            <div className="k-pt-3 k-pl-5">
               <Label className="k-label k-font-bold">
                 Select the applicable quirks
               </Label>
               <div
-                className="k-pt-5 k-pb-5"
-                style={{ maxHeight: "200px", overflowY: "scroll" }}
+                style={{
+                  maxHeight: "25vh",
+                  overflowY: "scroll",
+                  marginTop: "10px",
+                  marginBottom: "10px",
+                }}
               >
                 <ChipList
                   data={chipBehavioralQuirks}
                   selection="multiple"
                   onChange={handleChipChange("behaviorQuirks")}
-                  // value={state.dog.behaviorQuirks.map((quirk) => ({
-                  //   text: quirk.name,
-                  //   value: quirk.name,
-                  // }))}
+                  value={state.dog.behaviorQuirks.map((quirk) => quirk.name)}
                 />
               </div>
             </div>
@@ -365,7 +404,7 @@ export default function Home() {
                 data={chipCommands}
                 selection="multiple"
                 onChange={handleChipChange("knownCommands")}
-                // value={}
+                value={state.dog.knownCommands.map((commands) => commands.name)}
               />
             </div>
           </div>
@@ -379,7 +418,7 @@ export default function Home() {
     <div className={styles.page}>
       <header className={styles.header}>
         <h2>Bark-board</h2>
-        <div>
+        {/* <div>
           <Button themeColor="primary" fillMode="flat" className="k-mr-1">
             Home
           </Button>
@@ -390,7 +429,7 @@ export default function Home() {
           >
             Grid
           </Button>
-        </div>
+        </div> */}
       </header>
       {/* <div className={styles.container}>
         <Image
@@ -430,15 +469,15 @@ export default function Home() {
                         style={{
                           // justifyContent: "center",
                           alignItems: "center",
-                          padding: "15px",
+                          padding: "10px",
                         }}
                       >
                         <Image
                           //src = {card.headerImage}
                           src="/dog-breed-svgrepo-com.svg"
                           alt="dog-breed-svgrepo-com.svg"
-                          width={180}
-                          height={180}
+                          width={160}
+                          height={160}
                           priority
                         />
                         <CardTitle
