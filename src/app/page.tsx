@@ -10,6 +10,7 @@ import {
 } from "@progress/kendo-react-dateinputs";
 
 import {
+  CardFooter,
   CardImage,
   Stepper,
   StepperChangeEvent,
@@ -23,12 +24,13 @@ import {
   CardSubtitle,
   // Avatar,
 } from "@progress/kendo-react-layout";
+import { ChipList, Chip, ChipProps } from "@progress/kendo-react-buttons";
 
 import styles from "./page.module.css";
 
 import { useRouter } from "next/navigation";
 
-import { chevronRightIcon } from "@progress/kendo-svg-icons";
+import { chevronRightIcon, chevronLeftIcon } from "@progress/kendo-svg-icons";
 import {
   RadioGroup,
   RadioGroupChangeEvent,
@@ -39,6 +41,7 @@ import { BreedInfo } from "@/types/BreedInfo";
 import { Dog } from "@/types/Dog";
 import { DogQuirk } from "@/types/DogQuirk";
 import { DogCommand } from "@/types/DogCommand";
+import { commands } from "@/constants/data/DogCommands";
 
 const defaultDogQuirk: DogQuirk[] = [];
 
@@ -65,6 +68,8 @@ const defaultDog: Dog = {
   behaviorQuirks: defaultDogQuirk,
   knownCommands: defaultDogCommand,
 };
+
+const defaultDogCommands: DogCommand[] = commands as DogCommand[];
 
 type State = {
   dog: Dog;
@@ -102,34 +107,38 @@ function formReducer(state: State, action: Action): State {
   }
 }
 
+const chipsData = [
+  { text: "Filled Chip", value: "filled chip" },
+  { text: "Chip Disabled", value: "disabled chip", selected: true },
+  { text: "Outlined Chip", value: "outlined chip", fillMode: "outlined" },
+  { text: "Selected Chip", value: "selected chip", selected: true },
+  { text: "Removable Chip", value: "removable chip", removable: true },
+];
+
 const cardsData = [
   {
-    thumbnailSrc:
-      "https://demos.telerik.com/kendo-react-ui/assets/layout/card/rila_lakes.jpg",
+    thumbnailSrc: "/dog-wirehair-svgrepo-com.svg",
     headerTitle: "Tell us about your doggo",
     headerSubtitle: "And we'll give you a free summary report of your pup!",
     label: "Summary",
     url: "https://demos.telerik.com/kendo-react-ui/assets/layout/card/rila.jpg",
   },
   {
-    thumbnailSrc:
-      "https://demos.telerik.com/kendo-react-ui/assets/layout/card/rila_lakes.jpg",
+    thumbnailSrc: "/dog-wirehair-svgrepo-com.svg",
     headerTitle: "What Quirks and Suchf? 🫠",
     headerSubtitle: "Bulgaria, Europe",
-    label: "Physical Quirks",
+    label: "Quirks",
     url: "https://demos.telerik.com/kendo-react-ui/assets/layout/card/pamporovo.jpg",
   },
   {
-    thumbnailSrc:
-      "https://demos.telerik.com/kendo-react-ui/assets/layout/card/rila_lakes.jpg",
+    thumbnailSrc: "/dog-wirehair-svgrepo-com.svg",
     headerTitle: "What Words and Commands does your pooch know? 🤓",
     headerSubtitle: "Bulgaria, Europe",
     label: "Dictionary",
     url: "https://demos.telerik.com/kendo-react-ui/assets/layout/card/camping.jpg",
   },
   {
-    thumbnailSrc:
-      "https://demos.telerik.com/kendo-react-ui/assets/layout/card/rila_lakes.jpg",
+    thumbnailSrc: "/dog-wirehair-svgrepo-com.svg",
     headerTitle: "Here's your QR code! 🐶",
     label: "Your Report!",
     url: "https://demos.telerik.com/kendo-react-ui/assets/layout/card/camping.jpg",
@@ -162,6 +171,8 @@ export default function Home() {
       dispatch({ type: "DECREMENT_STEP" });
     }
   };
+
+  const handleStepIncrement = (increment: number) => (event: MouseEvent) => {};
 
   const card = cardsData[state.step];
 
@@ -221,32 +232,58 @@ export default function Home() {
             className={styles.cardBody}
             style={{ justifyContent: "space-between" }}
           >
-            <div>
-              <Label className="k-label">Name</Label>
-              <Input
-                name="name"
-                value={state.dog.name}
-                onChange={handleInputChange}
-                placeholder={"Sir Barksalot"}
-                style={{ width: "100%" }}
-              />
+            <div
+              className="k-d-flex k-flex-row  k-pt-5 k-pl-5"
+              style={{ justifyContent: "left" }}
+            >
+              <div className="k-pr-10">
+                <Label className="k-label">Name</Label>
+                <Input
+                  name="name"
+                  value={state.dog.name}
+                  onChange={handleInputChange}
+                  placeholder={"Sir Barksalot"}
+                  style={{ width: "100%" }}
+                />
+              </div>
+              <div>
+                <Label className="k-label">Gender</Label>
+                <RadioGroup
+                  name="gender"
+                  layout="horizontal"
+                  data={genderOptions}
+                  value={state.dog.gender}
+                  onChange={handleRadioChange("gender")}
+                />
+              </div>
             </div>
-            <div>
-              <Label className="k-label">Gender</Label>
-              <RadioGroup
-                name="gender"
-                data={genderOptions}
-                value={state.dog.gender}
-                onChange={handleRadioChange("gender")}
-              />
-            </div>
-
-            <div>
+            <div className="k-pl-5 k-pv-10">
               <Label editorId="date">Select date</Label>
               <DatePicker
                 id="date"
                 value={state.dog.birthday}
                 onChange={handleDateChange}
+              />
+            </div>
+            <div>
+              <ChipList
+                selection={"single"}
+                defaultData={chipsData}
+                chip={(props: ChipProps) => {
+                  const { dataItem, onClick, onRemove } = props;
+                  return (
+                    <Chip
+                      text={dataItem.text}
+                      value={dataItem.value}
+                      disabled={dataItem.disabled}
+                      selected={dataItem.selected}
+                      fillMode={dataItem.fillMode}
+                      removable={dataItem.removable}
+                      onClick={onClick}
+                      onRemove={onRemove}
+                    />
+                  );
+                }}
               />
             </div>
           </div>
@@ -287,47 +324,16 @@ export default function Home() {
           </Button>
         </div>
       </header>
-      <div className={styles.container}>
+      {/* <div className={styles.container}>
         <Image
           className={styles.logoImage}
-          src="/dog-wirehair-svgrepo-com.svg"
+          src={card.thumbnailSrc}
           alt="React Logo"
           width={886}
           height={788}
           priority
         />
-        <div className="k-d-flex k-flex-col">
-          <h2 className={styles.title}>Welcome to barK ! Board</h2>
-          <h3 className={styles.subtitle}>
-            Comprehensive React UI Component Library
-          </h3>
-          <div className="k-mt-3">
-            <Button themeColor="primary" className="k-mr-2">
-              <a href="https://www.telerik.com/kendo-react-ui" target="_blank">
-                Try KendoReact
-              </a>
-            </Button>
-            <Button themeColor="secondary" fillMode="solid">
-              <a href="https://vercel.com/" target="_blank">
-                More about Next.js
-              </a>
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      <section className={styles.section}>
-        <div className={styles.container}>
-          <div className="k-pl-8">
-            <h5 className={styles.sectionTitle}>Let's get started</h5>
-            <p>
-              Edit index page at or set up data source at{" "}
-              <code>src/pages/index.jsx</code> or set up data source at{" "}
-              <code>kendo/data.json</code>
-            </p>
-          </div>
-        </div>
-      </section>
+      </div> */}
 
       <section className={styles.cardsSection}>
         <div className={styles.cardsWrapper}>
@@ -348,8 +354,7 @@ export default function Home() {
                       className="k-d-flex k-flex-row"
                       style={{
                         justifyContent: "space-between",
-                        padding: "15px",
-                        marginBottom: 10,
+                        padding: "10px",
                       }}
                     >
                       <div
@@ -358,19 +363,18 @@ export default function Home() {
                           // justifyContent: "center",
                           alignItems: "center",
                           padding: "15px",
-                          marginBottom: 10,
                         }}
                       >
                         <Image
                           //src = {card.headerImage}
                           src="/dog-breed-svgrepo-com.svg"
-                          alt="Virtual Classroom Logo"
+                          alt="dog-breed-svgrepo-com.svg"
                           width={180}
                           height={180}
                           priority
                         />
                         <CardTitle
-                          style={{ marginBottom: "4px", paddingLeft: "20px" }}
+                          style={{ marginBottom: "2px", paddingLeft: "20px" }}
                         >
                           {card.headerTitle}
                         </CardTitle>
@@ -378,30 +382,49 @@ export default function Home() {
                           <p>{card.headerSubtitle}</p>
                         </CardSubtitle> */}
                       </div>
-                      <CardActions>
-                        <div
-                          style={{
-                            marginRight: "-25px",
-                            marginTop: "-80px",
-                          }}
-                        >
-                          <Button themeColor="primary" fillMode="flat">
-                            <SvgIcon icon={chevronRightIcon} size="large" />
-                          </Button>
-                        </div>
-                      </CardActions>
                     </div>
                   </CardHeader>
                   <CardBody>{cardInputGroupings(state.step)}</CardBody>
-                  <div style={{ margin: "10px" }}>
-                    <Stepper
-                      className="my_stepper"
-                      value={state.step}
-                      onChange={handleStepperChange}
-                      mode={"labels"}
-                      items={labelOnly}
-                    />
-                  </div>
+                  <CardFooter>
+                    <div
+                      className="k-d-flex k-flex-row"
+                      style={{
+                        margin: "10px",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      {state.step != 0 ? (
+                        <Button
+                          themeColor="primary"
+                          fillMode="flat"
+                          className="roundButton"
+                          // onClick={handleStepIncrement(-1)}
+                        >
+                          <SvgIcon icon={chevronLeftIcon} size="large" />
+                        </Button>
+                      ) : (
+                        <></>
+                      )}
+
+                      <Stepper
+                        // className="my_stepper"
+                        value={state.step}
+                        onChange={handleStepperChange}
+                        mode={"labels"}
+                        items={labelOnly}
+                      />
+
+                      <Button
+                        themeColor="primary"
+                        fillMode="flat"
+                        className="roundButton"
+                        // onClick={handleStepIncrement(1)}
+                      >
+                        <SvgIcon icon={chevronRightIcon} size="large" />
+                      </Button>
+                    </div>
+                  </CardFooter>
                 </Card>
               </div>
             </div>
