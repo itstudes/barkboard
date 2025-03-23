@@ -3,7 +3,7 @@
 import React from "react";
 import "./Tiles.css";
 import { DogCommand } from "@/types/DogCommand";
-import { ChipList } from "@progress/kendo-react-buttons";
+import { Chip, ChipList, ChipProps } from "@progress/kendo-react-buttons";
 
 interface CommandChipsTileProps {
   knownCommands: DogCommand[];
@@ -12,10 +12,10 @@ interface CommandChipsTileProps {
 interface CommandChip {
   text: string;
   value: string;
-  svgIcon: string;
-  size?: "small" | "medium" | "large";
-  themeColor?: "base" | "error" | "info" | "success" | "warning" | null;
-  fillMode?: "solid" | "outline" | null;
+  icon: string;
+  size: "small" | "medium" | "large";
+  themeColor: "base" | "error" | "info" | "success" | "warning";
+  fillMode: "solid" | "outline";
 }
 
 //method to get the color from the command type
@@ -48,7 +48,7 @@ const buildCommandChip = (command: DogCommand): CommandChip => {
   return {
     text: command.name,
     value: command.name,
-    svgIcon: "",
+    icon: "",
     size: "medium",
     themeColor: getCommandTypeColor(command.type),
     fillMode: fillMode,
@@ -63,7 +63,20 @@ const CommandChipsTile: React.FC<CommandChipsTileProps> = ({
     buildCommandChip(command)
   );
 
-  return <ChipList defaultData={commandChips} selection="multiple" />;
+  return (
+    <ChipList
+      data={commandChips}
+      selection="multiple"
+      chip={(props: ChipProps) => (
+        <Chip
+          {...props}
+          themeColor={props.dataItem.themeColor}
+          fillMode={props.dataItem.fillMode}
+          size={props.dataItem.size}
+        />
+      )}
+    />
+  );
 };
 
 export default CommandChipsTile;
