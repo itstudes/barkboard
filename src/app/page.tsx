@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useReducer } from "react";
+import React, { useReducer } from "react";
 import Image from "next/image";
 import { SvgIcon } from "@progress/kendo-react-common";
 import { Button } from "@progress/kendo-react-buttons";
@@ -13,7 +13,6 @@ import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
 
 import {
   CardFooter,
-  CardImage,
   Stepper,
   StepperChangeEvent,
 } from "@progress/kendo-react-layout";
@@ -22,8 +21,6 @@ import {
   CardHeader,
   CardTitle,
   CardBody,
-  CardActions,
-  CardSubtitle,
   // Avatar,
 } from "@progress/kendo-react-layout";
 import { ChipList, ChipListChangeEvent } from "@progress/kendo-react-buttons";
@@ -32,7 +29,11 @@ import styles from "./page.module.css";
 
 import { useRouter } from "next/navigation";
 
-import { chevronRightIcon, chevronLeftIcon } from "@progress/kendo-svg-icons";
+import {
+  chevronRightIcon,
+  chevronLeftIcon,
+  columnsIcon,
+} from "@progress/kendo-svg-icons";
 import {
   RadioGroup,
   RadioGroupChangeEvent,
@@ -209,7 +210,7 @@ const cardsData = [
   },
   {
     thumbnailSrc: "/dog-wirehair-svgrepo-com.svg",
-    headerTitle: "Here's your QR code! 🐶",
+    headerTitle: "Here's your report! 🐶",
     label: "Report",
     url: "https://demos.telerik.com/kendo-react-ui/assets/layout/card/camping.jpg",
   },
@@ -533,14 +534,46 @@ export default function Home() {
       case 5:
         return (
           <div className={styles.cardBody}>
-            <div>Report!!!</div>
-            <Button
-              themeColor="primary"
-              fillMode="outline"
-              onClick={onClickGoToReport}
+            <div
+              className="k-pt-3 k-pl-5"
+              style={{
+                height: "100%",
+                display: "flex",
+                flexDirection: "column",
+                justifyItems: "left",
+                // alignItems: "center",
+              }}
             >
-              Gimme my report
-            </Button>
+              <h1>Get your report</h1>
+              <p className="k-pt-3">
+                Go to your report and share the url with anytone you want to see
+                it.
+              </p>
+              <div
+                className="k-d-flex k-flex-row k-pt-5"
+                style={{
+                  justifyContent: "center",
+                  alignItems: "center",
+                  // width: "100%",
+                }}
+              >
+                <Button
+                  themeColor="primary"
+                  fillMode="outline"
+                  onClick={onClickGoToReport}
+                >
+                  Go to report
+                </Button>
+                <span style={{ width: "10px" }} />
+                <Button
+                  themeColor="secondary"
+                  fillMode="outline"
+                  onClick={handleReset}
+                >
+                  Reset Profile
+                </Button>
+              </div>
+            </div>
           </div>
         );
       default:
