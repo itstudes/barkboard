@@ -1,4 +1,28 @@
 :root {
+  --kendo-color-primary-subtle: #F3E5F5;
+  --kendo-color-primary-subtle-hover: #E1BEE7;
+  --kendo-color-primary-subtle-active: #CE93D8;
+  --kendo-color-primary: #9C27B0;
+  --kendo-color-primary-hover: #8E24AA;
+  --kendo-color-primary-active: #7B1FA2;
+  --kendo-color-primary-emphasis: #AB47BC;
+  --kendo-color-primary-on-subtle: #4A148C;
+  --kendo-color-on-primary: #FFFFFF;
+  --kendo-color-primary-on-surface: #9C27B0;
+
+    /* Green Accent Theme */
+    --kendo-color-secondary-subtle: #E8F5E9;
+    --kendo-color-secondary-subtle-hover: #C8E6C9;
+    --kendo-color-secondary-subtle-active: #A5D6A7;
+    --kendo-color-secondary: #4CAF50;
+    --kendo-color-secondary-hover: #43A047;
+    --kendo-color-secondary-active: #388E3C;
+    --kendo-color-secondary-emphasis: #66BB6A;
+    --kendo-color-secondary-on-subtle: #1B5E20;
+    --kendo-color-on-secondary: #FFFFFF;
+    --kendo-color-secondary-on-surface: #4CAF50;
+  
+
   --max-width: 1100px;
   --font-roboto: 'Roboto', sans-serif;
   --font-weight-300: 300;
