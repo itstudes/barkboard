@@ -24,7 +24,7 @@ import {
   CardSubtitle,
   // Avatar,
 } from "@progress/kendo-react-layout";
-import { ChipList, Chip, ChipProps } from "@progress/kendo-react-buttons";
+import { ChipList, ChipListChangeEvent } from "@progress/kendo-react-buttons";
 
 import styles from "./page.module.css";
 
@@ -69,7 +69,7 @@ const defaultDog: Dog = {
   knownCommands: defaultDogCommand,
 };
 
-const defaultDogCommands: DogCommand[] = commands as DogCommand[];
+// const defaultDogCommands: DogCommand[] = commands as DogCommand[];
 
 type State = {
   dog: Dog;
@@ -83,7 +83,8 @@ type Action =
     }
   | { type: "RESET" }
   | { type: "INCREMENT_STEP" }
-  | { type: "DECREMENT_STEP" };
+  | { type: "DECREMENT_STEP" }
+  | { type: "TOGGLE_KNOWN_COMMAND"; payload: DogCommand };
 
 function formReducer(state: State, action: Action): State {
   switch (action.type) {
@@ -102,18 +103,30 @@ function formReducer(state: State, action: Action): State {
       return { ...state, step: state.step + 1 };
     case "DECREMENT_STEP":
       return { ...state, step: state.step > 0 ? state.step - 1 : 0 };
+    case "TOGGLE_KNOWN_COMMAND": {
+      const command = action.payload;
+      const isAlreadyKnown = state.dog.knownCommands.some(
+        (cmd) => cmd.name === command.name
+      );
+      return {
+        ...state,
+        dog: {
+          ...state.dog,
+          knownCommands: isAlreadyKnown
+            ? state.dog.knownCommands.filter((cmd) => cmd.name !== command.name)
+            : [...state.dog.knownCommands, command],
+        },
+      };
+    }
     default:
       return state;
   }
 }
 
-const chipsData = [
-  { text: "Filled Chip", value: "filled chip" },
-  { text: "Chip Disabled", value: "disabled chip", selected: true },
-  { text: "Outlined Chip", value: "outlined chip", fillMode: "outlined" },
-  { text: "Selected Chip", value: "selected chip", selected: true },
-  { text: "Removable Chip", value: "removable chip", removable: true },
-];
+const chipCommands = commands.map((command) => ({
+  text: command.name,
+  value: command.name,
+}));
 
 const cardsData = [
   {
@@ -145,6 +158,15 @@ const cardsData = [
   },
 ];
 
+// const defaultDogCommands: Array<{
+//   name: "sit";
+//   expectation: "The dog sits calmly where it was.";
+//   similarToCommandsBitMap: 2;
+//   type: "obedience";
+// }> = [
+//   commands.map
+// ]
+
 const genderOptions: Array<{ label: string; value: Dog["gender"] }> = [
   { label: "Male", value: "male" },
   // { label: "Neutered Male", value: "male_neutered" },
@@ -172,7 +194,13 @@ export default function Home() {
     }
   };
 
-  const handleStepIncrement = (increment: number) => (event: MouseEvent) => {};
+  const handleStepIncrement = (increment: number) => () => {
+    if (increment == 1) {
+      dispatch({ type: "INCREMENT_STEP" });
+    } else if (increment == -1) {
+      dispatch({ type: "DECREMENT_STEP" });
+    }
+  };
 
   const card = cardsData[state.step];
 
@@ -220,6 +248,14 @@ export default function Home() {
     });
   };
 
+  const handleChipChange = (event: ChipListChangeEvent) => {
+    const value = event.value as string;
+    const commandObj = commands.find((c) => c.name === value);
+    if (commandObj) {
+      dispatch({ type: "TOGGLE_KNOWN_COMMAND", payload: commandObj });
+    }
+  };
+
   const handleReset = () => {
     dispatch({ type: "RESET" });
   };
@@ -265,41 +301,37 @@ export default function Home() {
                 onChange={handleDateChange}
               />
             </div>
+          </div>
+        );
+      case 1:
+        return (
+          <div className={styles.cardBody}>
             <div>
+              <Label className="k-label">Quirks</Label>
+
               <ChipList
-                selection={"single"}
-                defaultData={chipsData}
-                chip={(props: ChipProps) => {
-                  const { dataItem, onClick, onRemove } = props;
-                  return (
-                    <Chip
-                      text={dataItem.text}
-                      value={dataItem.value}
-                      disabled={dataItem.disabled}
-                      selected={dataItem.selected}
-                      fillMode={dataItem.fillMode}
-                      removable={dataItem.removable}
-                      onClick={onClick}
-                      onRemove={onRemove}
-                    />
-                  );
-                }}
+                data={chipCommands}
+                selection="multiple"
+                onChange={handleChipChange}
+                // value={value}
               />
             </div>
           </div>
         );
-      case 1:
-        return <div className={styles.cardBody}></div>;
       case 2:
         return (
           <div className={styles.cardBody}>
-            <Label className="k-label">Gender</Label>
-            <RadioGroup
-              name="gender"
-              data={genderOptions}
-              value={state.dog.gender}
-              onChange={handleRadioChange("gender")}
-            />
+            <div>
+              <Label className="k-label">
+                Please select all your dog's known Commands
+              </Label>
+              <ChipList
+                data={chipCommands}
+                selection="multiple"
+                onChange={handleChipChange}
+                // value={}
+              />
+            </div>
           </div>
         );
       default:
@@ -394,18 +426,18 @@ export default function Home() {
                         justifyContent: "space-between",
                       }}
                     >
-                      {state.step != 0 ? (
-                        <Button
-                          themeColor="primary"
-                          fillMode="flat"
-                          className="roundButton"
-                          // onClick={handleStepIncrement(-1)}
-                        >
-                          <SvgIcon icon={chevronLeftIcon} size="large" />
-                        </Button>
-                      ) : (
-                        <></>
-                      )}
+                      <Button
+                        style={{
+                          opacity: state.step != 0 ? 100 : 0,
+                        }}
+                        themeColor="primary"
+                        fillMode="flat"
+                        className="roundButton"
+                        onClick={handleStepIncrement(-1)}
+                        disabled={state.step == 0}
+                      >
+                        <SvgIcon icon={chevronLeftIcon} size="large" />
+                      </Button>
 
                       <Stepper
                         // className="my_stepper"
@@ -414,12 +446,15 @@ export default function Home() {
                         mode={"labels"}
                         items={labelOnly}
                       />
-
                       <Button
+                        style={{
+                          opacity: state.step != cardsData.length - 1 ? 100 : 0,
+                        }}
                         themeColor="primary"
                         fillMode="flat"
                         className="roundButton"
-                        // onClick={handleStepIncrement(1)}
+                        onClick={handleStepIncrement(1)}
+                        disabled={state.step == cardsData.length - 1}
                       >
                         <SvgIcon icon={chevronRightIcon} size="large" />
                       </Button>
