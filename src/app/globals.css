@@ -62,4 +62,10 @@ a {
 
 .k-card {
   width: 65vw;
+  height: 90vh;
+}
+
+nav.k-stepper {
+  flex-grow: 1;
+  width: auto;
 }

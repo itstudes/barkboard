@@ -42,6 +42,11 @@ import { Dog } from "@/types/Dog";
 import { DogQuirk } from "@/types/DogQuirk";
 import { DogCommand } from "@/types/DogCommand";
 import { commands } from "@/constants/data/DogCommands";
+import { physicalQuirks, behavioralQuirks } from "@/constants/data/DogQuirks";
+import {
+  MultiSelect,
+  MultiSelectChangeEvent,
+} from "@progress/kendo-react-dropdowns";
 
 const defaultDogQuirk: DogQuirk[] = [];
 
@@ -79,23 +84,25 @@ type State = {
 type Action =
   | {
       type: "UPDATE_ANSWER";
-      payload: { key: string; value: string | Date; isLastQuestion?: boolean };
+      payload: { key: string; value: string | Date };
     }
   | { type: "RESET" }
   | { type: "INCREMENT_STEP" }
   | { type: "DECREMENT_STEP" }
-  | { type: "TOGGLE_KNOWN_COMMAND"; payload: DogCommand };
+  | { type: "TOGGLE_KNOWN_COMMAND"; payload: DogCommand }
+  | { type: "TOGGLE_BEHAVIOUR_QUIRKS"; payload: DogQuirk };
 
 function formReducer(state: State, action: Action): State {
   switch (action.type) {
     case "UPDATE_ANSWER":
       return {
+        ...state,
         dog: {
           ...state.dog,
           [action.payload.key]: action.payload.value,
         },
         // Increment the step counter if this is the last question of the current step
-        step: action.payload.isLastQuestion ? state.step + 1 : state.step,
+        // step: action.payload.isLastQuestion ? state.step + 1 : state.step,
       };
     case "RESET":
       return { dog: defaultDog, step: 0 };
@@ -118,6 +125,21 @@ function formReducer(state: State, action: Action): State {
         },
       };
     }
+    case "TOGGLE_BEHAVIOUR_QUIRKS": {
+      const quirk = action.payload;
+      const isAlreadyKnown = state.dog.behaviorQuirks.some(
+        (cmd) => cmd.name === quirk.name
+      );
+      return {
+        ...state,
+        dog: {
+          ...state.dog,
+          behaviorQuirks: isAlreadyKnown
+            ? state.dog.behaviorQuirks.filter((cmd) => cmd.name !== quirk.name)
+            : [...state.dog.behaviorQuirks, quirk],
+        },
+      };
+    }
     default:
       return state;
   }
@@ -126,6 +148,11 @@ function formReducer(state: State, action: Action): State {
 const chipCommands = commands.map((command) => ({
   text: command.name,
   value: command.name,
+}));
+
+const chipBehavioralQuirks = behavioralQuirks.map((quirk) => ({
+  text: quirk.name,
+  value: quirk.name,
 }));
 
 const cardsData = [
@@ -138,7 +165,7 @@ const cardsData = [
   },
   {
     thumbnailSrc: "/dog-wirehair-svgrepo-com.svg",
-    headerTitle: "What Quirks and Suchf? 🫠",
+    headerTitle: "What Behavioural quirks do they have? 🫠",
     headerSubtitle: "Bulgaria, Europe",
     label: "Quirks",
     url: "https://demos.telerik.com/kendo-react-ui/assets/layout/card/pamporovo.jpg",
@@ -211,12 +238,9 @@ export default function Home() {
   const handleRadioChange =
     (name: string) => (event: RadioGroupChangeEvent) => {
       const { value } = event;
-      const isLastQuestion = false;
-      console.log(name);
-      console.log(value);
       dispatch({
         type: "UPDATE_ANSWER",
-        payload: { key: name, value, isLastQuestion: isLastQuestion },
+        payload: { key: name, value },
       });
     };
 
@@ -224,15 +248,9 @@ export default function Home() {
     const value = event.target.value as Date;
     const name = event.target.name as string;
 
-    console.log(name);
-    console.log(typeof event.value);
-    console.log(event.value);
-    console.log(value);
-    const isLastQuestion = false;
-
     dispatch({
       type: "UPDATE_ANSWER",
-      payload: { key: name, value, isLastQuestion: isLastQuestion },
+      payload: { key: name, value },
     });
   };
 
@@ -240,19 +258,25 @@ export default function Home() {
     const name = event.target.name as string;
     const value = event.target.value as string;
 
-    const isLastQuestion = false;
-
     dispatch({
       type: "UPDATE_ANSWER",
-      payload: { key: name, value, isLastQuestion: isLastQuestion },
+      payload: { key: name, value },
     });
   };
 
-  const handleChipChange = (event: ChipListChangeEvent) => {
+  const handleChipChange = (name: string) => (event: ChipListChangeEvent) => {
     const value = event.value as string;
-    const commandObj = commands.find((c) => c.name === value);
-    if (commandObj) {
-      dispatch({ type: "TOGGLE_KNOWN_COMMAND", payload: commandObj });
+    console.log(name);
+    if (name == "knownCommands") {
+      const commandObj = commands.find((c) => c.name === value);
+      if (commandObj) {
+        dispatch({ type: "TOGGLE_KNOWN_COMMAND", payload: commandObj });
+      }
+    } else if (name === "behaviorQuirks") {
+      const quirksObj = behavioralQuirks.find((c) => c.name === value);
+      if (quirksObj) {
+        dispatch({ type: "TOGGLE_BEHAVIOUR_QUIRKS", payload: quirksObj });
+      }
     }
   };
 
@@ -272,8 +296,8 @@ export default function Home() {
               className="k-d-flex k-flex-row  k-pt-5 k-pl-5"
               style={{ justifyContent: "left" }}
             >
-              <div className="k-pr-10">
-                <Label className="k-label">Name</Label>
+              <div className="k-pr-10" style={{ width: "60%" }}>
+                <Label className="k-label k-font-bold">Name</Label>
                 <Input
                   name="name"
                   value={state.dog.name}
@@ -283,7 +307,7 @@ export default function Home() {
                 />
               </div>
               <div>
-                <Label className="k-label">Gender</Label>
+                <Label className="k-label k-font-bold">Gender</Label>
                 <RadioGroup
                   name="gender"
                   layout="horizontal"
@@ -293,8 +317,10 @@ export default function Home() {
                 />
               </div>
             </div>
-            <div className="k-pl-5 k-pv-10">
-              <Label editorId="date">Select date</Label>
+            <div className="k-pl-5 k-pt-10" style={{ width: "35%" }}>
+              <Label editorId="date" className="k-label k-font-bold">
+                Select birth date
+              </Label>
               <DatePicker
                 id="date"
                 value={state.dog.birthday}
@@ -307,14 +333,23 @@ export default function Home() {
         return (
           <div className={styles.cardBody}>
             <div>
-              <Label className="k-label">Quirks</Label>
-
-              <ChipList
-                data={chipCommands}
-                selection="multiple"
-                onChange={handleChipChange}
-                // value={value}
-              />
+              <Label className="k-label k-font-bold">
+                Select the applicable quirks
+              </Label>
+              <div
+                className="k-pt-5 k-pb-5"
+                style={{ maxHeight: "200px", overflowY: "scroll" }}
+              >
+                <ChipList
+                  data={chipBehavioralQuirks}
+                  selection="multiple"
+                  onChange={handleChipChange("behaviorQuirks")}
+                  // value={state.dog.behaviorQuirks.map((quirk) => ({
+                  //   text: quirk.name,
+                  //   value: quirk.name,
+                  // }))}
+                />
+              </div>
             </div>
           </div>
         );
@@ -322,13 +357,14 @@ export default function Home() {
         return (
           <div className={styles.cardBody}>
             <div>
-              <Label className="k-label">
+              <Label className="k-label k-font-bold">
                 Please select all your dog's known Commands
               </Label>
               <ChipList
+                className="k-pt-5"
                 data={chipCommands}
                 selection="multiple"
-                onChange={handleChipChange}
+                onChange={handleChipChange("knownCommands")}
                 // value={}
               />
             </div>
@@ -406,7 +442,7 @@ export default function Home() {
                           priority
                         />
                         <CardTitle
-                          style={{ marginBottom: "2px", paddingLeft: "20px" }}
+                          style={{ marginBottom: "2px", paddingLeft: "22px" }}
                         >
                           {card.headerTitle}
                         </CardTitle>
@@ -416,7 +452,9 @@ export default function Home() {
                       </div>
                     </div>
                   </CardHeader>
-                  <CardBody>{cardInputGroupings(state.step)}</CardBody>
+                  <CardBody className={styles.cardBody}>
+                    {cardInputGroupings(state.step)}
+                  </CardBody>
                   <CardFooter>
                     <div
                       className="k-d-flex k-flex-row"

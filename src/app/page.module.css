@@ -127,7 +127,6 @@
 }
 
 .card {
-  width: 240px;
   box-shadow: var(--card-box-shadow);
 }
 
@@ -164,7 +163,22 @@
   line-height: var(--line-height-20);
 }
 
+.datePicker {
+  width: 200px;
+}
+
  
+  /* .cardsSection {
+    padding-top: "20px";
+  } */
+
+  .my_stepper {
+    flex: 1;
+  }
+
+  /* .roundButton {
+    flex: 1;
+  } */
 
 /* Responsive */
 @media (min-width: 601px) and (max-width: 920px) {
@@ -190,15 +204,4 @@
     padding-left: 0;
   }
 
-  /* .cardsSection {
-    padding-top: "20px";
-  } */
-
-  .my_stepper {
-    flex: 1;
-  }
-
-  /* .roundButton {
-    flex: 1;
-  } */
 }
